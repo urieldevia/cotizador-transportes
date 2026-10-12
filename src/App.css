@@ -1,0 +1,971 @@
+/* ============================================
+   SAMSUNG ONE UI 8.5
+   ============================================ */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  --samsung-blue: #0072de;
+  --samsung-blue-light: #e6f0fb;
+  --samsung-blue-dark: #005bb5;
+  --bg-app: #eef0f4;
+  --bg-card: #ffffff;
+  --bg-input: #f2f4f8;
+  --bg-input-hover: #e8ebf0;
+  --bg-elevated: #f7f8fb;
+  --text-primary: #0a0a0a;
+  --text-secondary: #6b6b70;
+  --text-tertiary: #a0a0a8;
+  --danger: #e63946;
+  --danger-bg: #fdecee;
+  --success: #21a366;
+  --success-bg: #e6f5ec;
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(10, 20, 40, 0.06);
+  --shadow-elevated: 0 2px 8px rgba(0, 0, 0, 0.06), 0 16px 40px rgba(10, 20, 40, 0.1);
+  --radius-card: 28px;
+  --radius-input: 18px;
+  --radius-pill: 100px;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: 'SamsungOne', 'Samsung One UI', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+  background: var(--bg-app);
+  background-image:
+    radial-gradient(circle at 0% 0%, rgba(0, 114, 222, 0.06) 0%, transparent 40%),
+    radial-gradient(circle at 100% 100%, rgba(120, 80, 220, 0.05) 0%, transparent 40%);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* ============================================
+   LAYOUT
+   ============================================ */
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 56px 20px 120px;
+}
+
+.cotizador h1 {
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  text-align: center;
+  line-height: 1.1;
+}
+
+.cotizador h1::after {
+  content: 'Servicios de transporte de carga';
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: -0.005em;
+  margin-top: 10px;
+  margin-bottom: 36px;
+  line-height: 1.4;
+}
+
+/* ============================================
+   FORM CARD
+   ============================================ */
+.form-card {
+  background: var(--bg-card);
+  padding: 28px 24px;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  margin-bottom: 20px;
+}
+
+/* ============================================
+   FORM GROUP
+   ============================================ */
+.form-group {
+  margin-bottom: 22px;
+}
+
+.form-group > label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+  letter-spacing: -0.005em;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group select {
+  width: 100%;
+  padding: 14px 18px;
+  border: none;
+  border-radius: var(--radius-input);
+  font-size: 15px;
+  font-family: inherit;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-appearance: none;
+  appearance: none;
+  font-weight: 500;
+}
+
+.form-group select {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%236b6b70' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='4 6 8 10 12 6'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  background-size: 15px;
+  padding-right: 44px;
+  cursor: pointer;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  background: white;
+  box-shadow: 0 0 0 2px var(--samsung-blue);
+}
+
+.form-group input::placeholder {
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+/* ============================================
+   RADIO GROUP (segmented)
+   ============================================ */
+.radio-group {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  background: var(--bg-input);
+  padding: 5px;
+  border-radius: var(--radius-input);
+}
+
+.radio-btn {
+  padding: 11px 8px;
+  text-align: center;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  letter-spacing: -0.005em;
+}
+
+.radio-btn input {
+  display: none;
+}
+
+.radio-btn:hover {
+  color: var(--text-primary);
+}
+
+.radio-btn.active {
+  background: white;
+  color: var(--samsung-blue);
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 3px 10px rgba(0, 0, 0, 0.04);
+}
+
+/* ============================================
+   SELECTOR UBICACIÓN
+   ============================================ */
+.selector-ubicacion {
+  position: relative;
+  margin-bottom: 22px;
+}
+
+.selector-ubicacion > label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+  letter-spacing: -0.005em;
+}
+
+.selector-ubicacion input {
+  width: 100%;
+  padding: 14px 18px;
+  border: none;
+  border-radius: var(--radius-input);
+  font-size: 15px;
+  font-family: inherit;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 500;
+}
+
+.selector-ubicacion input::placeholder {
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+.selector-ubicacion input:focus {
+  outline: none;
+  background: white;
+  box-shadow: 0 0 0 2px var(--samsung-blue);
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 20px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: var(--shadow-elevated);
+  padding: 8px;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-primary);
+  border-radius: 12px;
+  transition: background 0.15s;
+  font-weight: 500;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background: var(--samsung-blue-light);
+  outline: none;
+}
+
+.dropdown-item strong {
+  font-weight: 700;
+}
+
+/* ============================================
+   TEXTO AUXILIAR
+   ============================================ */
+.muted {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.hint {
+  display: block;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  margin-top: 8px;
+  letter-spacing: -0.005em;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* ============================================
+   SECCIONES DE PUNTOS (carga / entrega)
+   ============================================ */
+.puntos-seccion {
+  margin-bottom: 22px;
+  padding: 20px 16px 16px;
+  background: var(--bg-elevated);
+  border-radius: 22px;
+}
+
+.puntos-header {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.005em;
+  margin-bottom: 14px;
+  padding-left: 4px;
+}
+
+.punto-item {
+  display: grid;
+  grid-template-columns: 1fr 78px 40px;
+  gap: 8px;
+  align-items: end;
+  margin-bottom: 10px;
+}
+
+.punto-ubicacion {
+  min-width: 0;
+}
+
+.punto-ubicacion .selector-ubicacion {
+  margin-bottom: 0;
+}
+
+.punto-pct {
+  display: flex;
+  flex-direction: column;
+}
+
+.punto-pct label {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.punto-pct input {
+  width: 100%;
+  padding: 14px 8px;
+  border: none;
+  border-radius: var(--radius-input);
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  text-align: center;
+  font-weight: 700;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.punto-pct input:focus {
+  outline: none;
+  background: white;
+  box-shadow: 0 0 0 2px var(--samsung-blue);
+}
+
+.btn-remove-punto {
+  width: 40px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: none;
+  border-radius: var(--radius-input);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 800;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.btn-remove-punto:hover {
+  background: rgba(230, 57, 70, 0.18);
+}
+
+.btn-add-punto {
+  width: 100%;
+  padding: 13px;
+  background: white;
+  color: var(--samsung-blue);
+  border: none;
+  border-radius: var(--radius-input);
+  font-size: 13.5px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  letter-spacing: -0.005em;
+}
+
+.btn-add-punto:hover {
+  background: var(--samsung-blue-light);
+  box-shadow: 0 2px 8px rgba(0, 114, 222, 0.15);
+}
+
+.btn-add-punto:active {
+  transform: scale(0.985);
+}
+
+/* ============================================
+   SECCIÓN OPCIONAL (legacy)
+   ============================================ */
+.seccion-opcional {
+  background: var(--bg-elevated);
+  border-radius: 22px;
+  padding: 20px 16px;
+  margin-bottom: 22px;
+}
+
+.subseccion {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.subseccion .selector-ubicacion:last-of-type {
+  margin-bottom: 0;
+}
+
+/* ============================================
+   PUNTO-ROW (legacy multi-punto)
+   ============================================ */
+.punto-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  margin-bottom: 12px;
+}
+
+.punto-row .selector-ubicacion {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+/* ============================================
+   BOTONES
+   ============================================ */
+.btn-remove {
+  padding: 14px 18px;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: none;
+  border-radius: var(--radius-input);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.btn-remove:hover {
+  background: rgba(230, 57, 70, 0.18);
+}
+
+.btn-secondary {
+  padding: 13px 20px;
+  background: white;
+  color: var(--samsung-blue);
+  border: none;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  transition: all 0.2s;
+  font-family: inherit;
+  margin-top: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.btn-secondary:hover {
+  background: var(--samsung-blue-light);
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 17px;
+  background: var(--samsung-blue);
+  color: white;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-size: 16px;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 8px;
+  box-shadow: 0 4px 16px rgba(0, 114, 222, 0.28);
+  letter-spacing: -0.005em;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--samsung-blue-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 114, 222, 0.35);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0) scale(0.985);
+  box-shadow: 0 2px 8px rgba(0, 114, 222, 0.3);
+}
+
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   CHECKBOX
+   ============================================ */
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  color: var(--text-primary);
+  cursor: pointer;
+  margin-bottom: 0;
+  user-select: none;
+  font-weight: 600;
+}
+
+.checkbox-row input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--samsung-blue);
+  cursor: pointer;
+}
+
+.checkbox-row strong {
+  font-weight: 700;
+  letter-spacing: -0.005em;
+}
+
+/* ============================================
+   RADIO VERTICAL (maniobras)
+   ============================================ */
+.radio-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  background: var(--bg-input);
+  border-radius: 22px;
+}
+
+.radio-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 14.5px;
+  color: var(--text-primary);
+  padding: 14px 16px;
+  border-radius: 18px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
+}
+
+.radio-line:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.radio-line input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--samsung-blue);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.radio-line input:checked + * {
+  font-weight: 700;
+}
+
+/* ============================================
+   ROW-2 (dos columnas)
+   ============================================ */
+.row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* ============================================
+   ALERTAS
+   ============================================ */
+.error-box {
+  padding: 16px 20px;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: none;
+  border-radius: 18px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.info-box {
+  padding: 16px 20px;
+  background: var(--samsung-blue-light);
+  color: var(--samsung-blue);
+  border: none;
+  border-radius: 18px;
+  margin-top: 12px;
+  font-size: 14px;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* ============================================
+   RESULTADO
+   ============================================ */
+.resultado {
+  background: var(--bg-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  animation: fadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.resultado-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 26px 20px;
+  background: white;
+}
+
+.resultado-header h2 {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.badge {
+  padding: 6px 14px;
+  background: var(--samsung-blue-light);
+  color: var(--samsung-blue);
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.resultado-descripcion {
+  padding: 20px 26px 22px;
+  background: linear-gradient(180deg, #f7fafd 0%, #eef4fb 100%);
+  border-top: 1px solid rgba(0, 114, 222, 0.06);
+  border-bottom: 1px solid rgba(0, 114, 222, 0.06);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.resultado-descripcion p {
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: #1a2b40;
+}
+
+.resultado-desglose {
+  padding: 26px 26px 20px;
+}
+
+.resultado-desglose h3 {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+  font-weight: 800;
+}
+
+.resultado-desglose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14.5px;
+}
+
+.resultado-desglose th {
+  text-align: left;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  font-weight: 700;
+  color: var(--text-secondary);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.resultado-desglose td {
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  vertical-align: top;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.resultado-desglose tr:last-child td {
+  border-bottom: none;
+  padding-bottom: 4px;
+}
+
+.resultado-desglose td > div {
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+.resultado-desglose .right {
+  text-align: right;
+  font-weight: 700;
+}
+
+.mono {
+  font-family: 'SF Mono', 'Roboto Mono', 'Menlo', monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* ============================================
+   ACCIONES DE LA DESCRIPCIÓN
+   ============================================ */
+.descripcion-acciones {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(0, 114, 222, 0.12);
+}
+
+button.btn-accion {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: white;
+  color: var(--text-primary);
+  border: none;
+  border-radius: var(--radius-pill);
+  font-size: 13.5px;
+  font-weight: 700;
+  font-family: inherit;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  line-height: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+button.btn-accion:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+}
+
+button.btn-accion:active {
+  transform: translateY(0) scale(0.97);
+  transition: transform 0.1s;
+}
+
+button.btn-accion svg {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+}
+
+button.btn-accion.btn-whatsapp {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+button.btn-accion.btn-whatsapp:hover {
+  background: rgba(33, 163, 102, 0.18);
+}
+
+button.btn-accion.copiado {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+button.btn-accion.copiado:hover {
+  background: rgba(33, 163, 102, 0.18);
+}
+
+/* ============================================
+   TOTALES
+   ============================================ */
+.resultado-totales {
+  padding: 20px 26px 26px;
+  background: var(--bg-elevated);
+}
+
+.resultado-totales .row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.resultado-totales .row.total {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary);
+  padding-top: 14px;
+  margin-top: 6px;
+  letter-spacing: -0.03em;
+}
+
+.resultado-totales .row.total .mono {
+  color: var(--samsung-blue);
+  font-weight: 800;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 640px) {
+  .app {
+    padding: 32px 14px 100px;
+  }
+
+  .cotizador h1 {
+    font-size: 30px;
+  }
+
+  .cotizador h1::after {
+    font-size: 13px;
+    margin-bottom: 28px;
+  }
+
+  .form-card {
+    padding: 22px 18px;
+    border-radius: 24px;
+  }
+
+  .radio-group {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .row-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .punto-item {
+    grid-template-columns: 1fr 66px 38px;
+  }
+
+  .resultado-header,
+  .resultado-descripcion,
+  .resultado-desglose,
+  .resultado-totales {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .descripcion-acciones {
+    flex-direction: column;
+  }
+
+  button.btn-accion {
+    width: 100%;
+    padding: 12px 18px;
+  }
+
+  .resultado-totales .row.total {
+    font-size: 21px;
+  }
+  /* ============================================
+   SECCIÓN ENTREGA RESALTADA
+   ============================================ */
+.puntos-entrega {
+  background: linear-gradient(180deg, #eaf3fd 0%, #dbeafb 100%);
+  box-shadow:
+    inset 0 0 0 2px rgba(0, 114, 222, 0.18),
+    0 2px 8px rgba(0, 114, 222, 0.06);
+  position: relative;
+}
+
+.puntos-entrega::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #0072de 0%, #4a9eff 100%);
+  border-radius: 22px 22px 0 0;
+}
+
+.puntos-header-entrega {
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  color: var(--samsung-blue) !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: -0.015em !important;
+  padding-left: 0 !important;
+  margin-bottom: 16px !important;
+}
+
+.puntos-icono-entrega {
+  font-size: 18px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 114, 222, 0.3));
+}
+
+/* Inputs dentro de la sección entrega: fondo blanco para contraste */
+.puntos-entrega .selector-ubicacion input,
+.puntos-entrega .punto-pct input {
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 114, 222, 0.08);
+}
+
+.puntos-entrega .selector-ubicacion input:focus,
+.puntos-entrega .punto-pct input:focus {
+  box-shadow:
+    0 0 0 2px var(--samsung-blue),
+    0 2px 8px rgba(0, 114, 222, 0.15);
+}
+
+.puntos-entrega .punto-pct label {
+  color: var(--samsung-blue);
+}
+
+/* Botón agregar entrega: más destacado */
+.btn-add-punto-entrega {
+  background: white !important;
+  color: var(--samsung-blue) !important;
+  font-weight: 800 !important;
+  box-shadow: 0 1px 3px rgba(0, 114, 222, 0.1) !important;
+}
+
+.btn-add-punto-entrega:hover {
+  background: var(--samsung-blue) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(0, 114, 222, 0.3) !important;
+}
+}
