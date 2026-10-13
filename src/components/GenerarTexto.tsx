@@ -51,30 +51,19 @@ export function GenerarTexto() {
   const texto = useMemo(() => {
     if (!unidadFisica) return '';
 
-    const sepGrueso = '━━━━━━━━━━━━━━━━━━━━━━━━━━━';
-    const sepFino = '───────────────────────────';
-
+    const sep = '───────────────────────────';
     const partes: string[] = [];
 
-    partes.push(sepGrueso);
-    partes.push(`   🚛 ${NOMBRE_EMPRESA}`);
-    partes.push(sepGrueso);
-    partes.push(sepFino);
+    partes.push(`🚛 ${NOMBRE_EMPRESA}`);
+    partes.push(sep);
 
-    partes.push('📋 DATOS DE LA UNIDAD:');
-    partes.push(sepFino);
+    partes.push('📋 DATOS DE LA UNIDAD');
     partes.push(`🚚 Unidad: ${unidadFisica.marca_modelo}`);
-    if (unidadFisica.color) {
-      partes.push(`🎨 Color: ${unidadFisica.color}`);
-    }
-    if (unidadFisica.placas) {
-      partes.push(`🔢 Placas: ${unidadFisica.placas}`);
-    }
+    if (unidadFisica.color) partes.push(`🎨 Color: ${unidadFisica.color}`);
+    if (unidadFisica.placas) partes.push(`🔢 Placas: ${unidadFisica.placas}`);
+    partes.push(sep);
 
-    partes.push(sepFino);
-    partes.push('👥 PERSONAL ASIGNADO:');
-    partes.push(sepFino);
-
+    partes.push('👥 PERSONAL ASIGNADO');
     if (personalSeleccionado.length === 0) {
       partes.push('  (sin personal asignado)');
     } else {
@@ -84,18 +73,17 @@ export function GenerarTexto() {
     }
 
     if (notas.trim()) {
-      partes.push(sepFino);
-      partes.push('📝 NOTAS:');
-      partes.push(sepFino);
+      partes.push(sep);
+      partes.push('📝 NOTAS');
       partes.push(notas.trim());
     }
 
     if (fechaFormateada) {
-      partes.push(sepFino);
+      partes.push(sep);
       partes.push(`📅 Fecha: ${fechaFormateada}`);
     }
 
-    partes.push(sepGrueso);
+    partes.push(sep);
 
     return partes.join('\n');
   }, [unidadFisica, personalSeleccionado, notas, fechaFormateada]);
