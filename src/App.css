@@ -1,5 +1,5 @@
 /* ============================================
-   SAMSUNG ONE UI 8.5
+   SAMSUNG ONE UI 8.5 — INTEGRADO
    ============================================ */
 * {
   box-sizing: border-box;
@@ -93,6 +93,115 @@ body {
   line-height: 1.4;
 }
 
+.documentos-tab h1 {
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.documentos-tab h1::after {
+  content: 'Genera documentos y administra tu catálogo';
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: -0.005em;
+  margin-top: 10px;
+  margin-bottom: 32px;
+  line-height: 1.4;
+}
+
+/* ============================================
+   TABS PRINCIPALES (Cotizador / Documentos)
+   ============================================ */
+.tabs-samsung {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  background: var(--bg-input);
+  padding: 5px;
+  border-radius: 22px;
+  margin-bottom: 24px;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tab-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 18px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: -0.005em;
+}
+
+.tab-item:hover {
+  color: var(--text-primary);
+}
+
+.tab-item.active {
+  background: white;
+  color: var(--samsung-blue);
+  font-weight: 800;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 3px 10px rgba(0, 0, 0, 0.04);
+}
+
+.tab-icono {
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* ============================================
+   SUBTABS (Generar / Unidades / Personal)
+   ============================================ */
+.subtabs-samsung {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  background: var(--bg-input);
+  padding: 4px;
+  border-radius: 18px;
+  margin-bottom: 24px;
+}
+
+.subtab-item {
+  padding: 12px 8px;
+  border: none;
+  background: transparent;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: -0.005em;
+}
+
+.subtab-item:hover {
+  color: var(--text-primary);
+}
+
+.subtab-item.active {
+  background: white;
+  color: var(--samsung-blue);
+  font-weight: 800;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
 /* ============================================
    FORM CARD
    ============================================ */
@@ -122,6 +231,7 @@ body {
 
 .form-group input[type="text"],
 .form-group input[type="number"],
+.form-group input[type="date"],
 .form-group select {
   width: 100%;
   padding: 14px 18px;
@@ -196,6 +306,43 @@ body {
   color: var(--samsung-blue);
   font-weight: 700;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 3px 10px rgba(0, 0, 0, 0.04);
+}
+
+/* ============================================
+   RADIO VERTICAL (maniobras / roles)
+   ============================================ */
+.radio-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  background: var(--bg-input);
+  border-radius: 22px;
+}
+
+.radio-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 14.5px;
+  color: var(--text-primary);
+  padding: 14px 16px;
+  border-radius: 18px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
+}
+
+.radio-line:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.radio-line input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--samsung-blue);
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
 /* ============================================
@@ -277,6 +424,23 @@ body {
 
 .dropdown-item strong {
   font-weight: 700;
+}
+
+.dropdown-item.activo,
+.dropdown-item.activo:hover,
+.dropdown-item.activo:focus {
+  background: var(--samsung-blue) !important;
+  color: white !important;
+  outline: none !important;
+}
+
+.dropdown-item.activo strong,
+.dropdown-item.activo .muted {
+  color: white !important;
+}
+
+.dropdown-item.activo .muted {
+  opacity: 0.75;
 }
 
 /* ============================================
@@ -383,6 +547,7 @@ body {
   font-weight: 800;
   font-family: inherit;
   transition: all 0.15s;
+  flex-shrink: 0;
 }
 
 .btn-remove-punto:hover {
@@ -486,7 +651,7 @@ body {
 }
 
 /* ============================================
-   SECCIÓN OPCIONAL (legacy)
+   SECCIÓN OPCIONAL
    ============================================ */
 .seccion-opcional {
   background: var(--bg-elevated);
@@ -506,7 +671,7 @@ body {
 }
 
 /* ============================================
-   PUNTO-ROW (legacy multi-punto)
+   PUNTO-ROW
    ============================================ */
 .punto-row {
   display: flex;
@@ -620,44 +785,7 @@ body {
 }
 
 /* ============================================
-   RADIO VERTICAL (maniobras)
-   ============================================ */
-.radio-vertical {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 6px;
-  background: var(--bg-input);
-  border-radius: 22px;
-}
-
-.radio-line {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  font-size: 14.5px;
-  color: var(--text-primary);
-  padding: 14px 16px;
-  border-radius: 18px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  font-weight: 600;
-}
-
-.radio-line:hover {
-  background: rgba(255, 255, 255, 0.7);
-}
-
-.radio-line input {
-  width: 20px;
-  height: 20px;
-  accent-color: var(--samsung-blue);
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-/* ============================================
-   ROW-2 (dos columnas)
+   ROW-2
    ============================================ */
 .row-2 {
   display: grid;
@@ -701,6 +829,7 @@ body {
   box-shadow: var(--shadow-card);
   overflow: hidden;
   animation: fadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 20px;
 }
 
 @keyframes fadeIn {
@@ -816,7 +945,7 @@ body {
 }
 
 /* ============================================
-   ACCIONES DE LA DESCRIPCIÓN (Copiar / WhatsApp)
+   ACCIONES DE LA DESCRIPCIÓN
    ============================================ */
 .descripcion-acciones {
   display: flex !important;
@@ -943,185 +1072,6 @@ button.btn-accion.copiado:hover {
 .estadia-total strong {
   font-weight: 800;
   letter-spacing: -0.01em;
-}
-
-/* ============================================
-   NAVEGACIÓN CON TECLADO — ESTADO ACTIVO
-   ============================================ */
-.dropdown-item.activo,
-.dropdown-item.activo:hover,
-.dropdown-item.activo:focus {
-  background: var(--samsung-blue) !important;
-  color: white !important;
-  outline: none !important;
-}
-
-.dropdown-item.activo strong,
-.dropdown-item.activo .muted {
-  color: white !important;
-}
-
-.dropdown-item.activo .muted {
-  opacity: 0.75;
-}
-
-/* ============================================
-   RESPONSIVE
-   ============================================ */
-@media (max-width: 640px) {
-  html, body {
-    min-height: 100dvh;
-    background-color: #eef0f4;
-  }
-
-  input,
-  select,
-  textarea {
-    font-size: 16px !important;
-  }
-
-  .app {
-    padding-top: max(24px, env(safe-area-inset-top));
-    padding-bottom: max(100px, env(safe-area-inset-bottom));
-    padding-left: max(14px, env(safe-area-inset-left));
-    padding-right: max(14px, env(safe-area-inset-right));
-  }
-
-  .cotizador h1 {
-    font-size: 30px;
-  }
-
-  .cotizador h1::after {
-    font-size: 13px;
-    margin-bottom: 28px;
-  }
-
-  .form-card {
-    padding: 22px 18px;
-    border-radius: 24px;
-  }
-
-  .radio-group {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .row-2 {
-    grid-template-columns: 1fr;
-  }
-
-  .punto-item {
-    grid-template-columns: 1fr 66px 38px;
-  }
-
-  .resultado-header,
-  .resultado-descripcion,
-  .resultado-desglose,
-  .resultado-totales {
-    padding-left: 20px;
-    padding-right: 20px;
-  }
-
-  .descripcion-acciones {
-    flex-direction: column !important;
-  }
-
-  button.btn-accion {
-    width: 100% !important;
-    padding: 12px 18px !important;
-  }
-
-  .resultado-totales .row.total {
-    font-size: 21px;
-  }
-  /* ============================================
-   TABS PRINCIPALES (Cotizador / Documentos)
-   ============================================ */
-.tabs-samsung {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px;
-  background: var(--bg-input);
-  padding: 5px;
-  border-radius: 22px;
-  margin-bottom: 24px;
-  max-width: 420px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.tab-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px 16px;
-  border: none;
-  background: transparent;
-  border-radius: 18px;
-  font-size: 15px;
-  font-weight: 600;
-  font-family: inherit;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.tab-item:hover {
-  color: var(--text-primary);
-}
-
-.tab-item.active {
-  background: white;
-  color: var(--samsung-blue);
-  font-weight: 800;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 3px 10px rgba(0, 0, 0, 0.04);
-}
-
-.tab-icono {
-  font-size: 18px;
-  line-height: 1;
-}
-
-/* ============================================
-   DOCUMENTOS TAB
-   ============================================ */
-.documentos-tab h1 {
-  font-size: 34px;
-  font-weight: 800;
-  letter-spacing: -0.035em;
-  color: var(--text-primary);
-  text-align: center;
-  margin-bottom: 24px;
-}
-
-.subtabs-samsung {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
-  background: var(--bg-input);
-  padding: 4px;
-  border-radius: 18px;
-  margin-bottom: 24px;
-}
-
-.subtab-item {
-  padding: 12px 8px;
-  border: none;
-  background: transparent;
-  border-radius: 14px;
-  font-size: 14px;
-  font-weight: 600;
-  font-family: inherit;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.subtab-item.active {
-  background: white;
-  color: var(--samsung-blue);
-  font-weight: 800;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 /* ============================================
@@ -1271,7 +1221,7 @@ button.btn-accion.copiado:hover {
 }
 
 /* ============================================
-   ADMIN (unidades / personal)
+   ADMIN
    ============================================ */
 .admin-seccion {
   display: flex;
@@ -1413,11 +1363,74 @@ button.btn-accion.copiado:hover {
 }
 
 /* ============================================
-   RESPONSIVE PARA DOCUMENTOS
+   RESPONSIVE
    ============================================ */
 @media (max-width: 640px) {
+  html, body {
+    min-height: 100dvh;
+    background-color: #eef0f4;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  .app {
+    padding-top: max(24px, env(safe-area-inset-top));
+    padding-bottom: max(100px, env(safe-area-inset-bottom));
+    padding-left: max(14px, env(safe-area-inset-left));
+    padding-right: max(14px, env(safe-area-inset-right));
+  }
+
+  .cotizador h1,
   .documentos-tab h1 {
-    font-size: 28px;
+    font-size: 30px;
+  }
+
+  .cotizador h1::after,
+  .documentos-tab h1::after {
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+
+  .form-card {
+    padding: 22px 18px;
+    border-radius: 24px;
+  }
+
+  .radio-group {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .row-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .punto-item {
+    grid-template-columns: 1fr 66px 38px;
+  }
+
+  .resultado-header,
+  .resultado-descripcion,
+  .resultado-desglose,
+  .resultado-totales {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .descripcion-acciones {
+    flex-direction: column !important;
+  }
+
+  button.btn-accion {
+    width: 100% !important;
+    padding: 12px 18px !important;
+  }
+
+  .resultado-totales .row.total {
+    font-size: 21px;
   }
 
   .tabs-samsung {
@@ -1451,5 +1464,8 @@ button.btn-accion.copiado:hover {
   .fecha-row {
     flex-wrap: wrap;
   }
-}
+
+  .texto-preview {
+    font-size: 11.5px;
+  }
 }
