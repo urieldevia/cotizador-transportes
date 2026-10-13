@@ -67,7 +67,6 @@ export function VolanteTab() {
   const [descripcionServicios, setDescripcionServicios] = useState('');
   const [descripcionCarga, setDescripcionCarga] = useState('');
 
-  // Filtros
   const [filtroUnidades, setFiltroUnidades] = useState('');
   const [filtroAuxiliares, setFiltroAuxiliares] = useState('');
   const [clienteSugerenciasAbiertas, setClienteSugerenciasAbiertas] = useState(false);
@@ -78,14 +77,12 @@ export function VolanteTab() {
   const pickerFechaRef = useRef<HTMLInputElement>(null);
   const clienteWrapRef = useRef<HTMLDivElement>(null);
 
-  // Cargar folio inicial
   useEffect(() => {
     if (vista === 'nuevo' && !volanteId) {
       obtenerSiguienteFolio().then(setFolio);
     }
   }, [vista, volanteId]);
 
-  // Cerrar sugerencias de cliente al hacer click fuera
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (
@@ -103,6 +100,7 @@ export function VolanteTab() {
     () => personal.filter((p) => p.rol === 'chofer' || p.rol === 'ambos'),
     [personal]
   );
+
   const auxiliaresDisponibles = useMemo(() => {
     const base = personal.filter(
       (p) => p.rol === 'auxiliar' || p.rol === 'ambos'
@@ -122,15 +120,12 @@ export function VolanteTab() {
     return unidades.filter((u) => {
       const prop = propietarios.find((p) => p.id === u.propietario_id);
       const texto = normalizarTexto(
-        `${u.marca_modelo} ${u.color || ''} ${u.placas || ''} ${
-          prop?.nombre || ''
-        }`
+        `${u.marca_modelo} ${u.color || ''} ${u.placas || ''} ${prop?.nombre || ''}`
       );
       return texto.includes(q);
     });
   }, [unidades, propietarios, filtroUnidades]);
 
-  // Clientes únicos de volantes previos
   const clientesHistoricos = useMemo(() => {
     const set = new Set<string>();
     volantes.forEach((v) => {
@@ -171,6 +166,28 @@ export function VolanteTab() {
     });
   };
 
+  const quitarUnidadDesdeAsignacion = (asignacionId: string) => {
+    const asig = asignaciones.find((a) => a.id === asignacionId);
+    if (!asig) return;
+    if (
+      !confirm('¿Quitar esta unidad del volante? Se perderán sus datos.')
+    )
+      return;
+    setAsignaciones((prev) => prev.filter((a) => a.id !== asignacionId));
+    if (asig.unidadFisicaId) {
+      setUnidadesSeleccionadas((prev) =>
+        prev.filter((id) => id !== asig.unidadFisicaId)
+      );
+    }
+  };
+
+  const quitarTodasLasUnidades = () => {
+    if (asignaciones.length === 0) return;
+    if (!confirm('¿Quitar todas las unidades del volante?')) return;
+    setUnidadesSeleccionadas([]);
+    setAsignaciones([]);
+  };
+
   const actualizarAsignacion = (id: string, patch: Partial<AsignacionUnidad>) => {
     setAsignaciones((prev) =>
       prev.map((a) => (a.id === id ? { ...a, ...patch } : a))
@@ -189,13 +206,6 @@ export function VolanteTab() {
       })),
     };
     setAsignaciones((prev) => [...prev, copia]);
-    if (orig.unidadFisicaId) {
-      setUnidadesSeleccionadas((prev) =>
-        prev.includes(orig.unidadFisicaId!)
-          ? prev
-          : [...prev, orig.unidadFisicaId!]
-      );
-    }
   };
 
   const toggleAuxiliar = (asignacionId: string, personalId: number) => {
@@ -213,13 +223,16 @@ export function VolanteTab() {
     );
   };
 
+  const limpiarAuxiliares = (asignacionId: string) => {
+    actualizarAsignacion(asignacionId, { auxiliaresIds: [] });
+  };
+
   const heredarDestino = (id: string, index: number) => {
     if (index === 0) return;
     const anterior = asignaciones[index - 1];
     actualizarAsignacion(id, { destino: anterior.destino });
   };
 
-  // Fecha
   const abrirPicker = () => {
     pickerFechaRef.current?.showPicker?.();
     pickerFechaRef.current?.click();
@@ -233,7 +246,6 @@ export function VolanteTab() {
     if (iso) setFechaTexto(fechaISOATexto(iso));
   };
 
-  // Guardar
   const handleGuardar = async () => {
     if (!folio.trim()) {
       setMsg('El folio es obligatorio');
@@ -275,7 +287,13 @@ export function VolanteTab() {
     }
   };
 
-  const handleNuevo = async () => {
+  const handleLimpiarTodo = async () => {
+    if (
+      !confirm(
+        '¿Limpiar todo el formulario? Se perderán TODOS los datos no guardados.'
+      )
+    )
+      return;
     setVolanteId(null);
     setFechaTexto('');
     setCliente('');
@@ -287,8 +305,8 @@ export function VolanteTab() {
     setDescripcionCarga('');
     setFiltroUnidades('');
     setFiltroAuxiliares('');
-    setVista('nuevo');
-    setMsg(null);
+    setMsg('✓ Formulario limpiado');
+    setTimeout(() => setMsg(null), 2000);
     const f = await obtenerSiguienteFolio();
     setFolio(f);
   };
@@ -314,12 +332,12 @@ export function VolanteTab() {
     setVista('nuevo');
   };
 
-  const handleEliminar = async (id: number) => {
-    if (!confirm('¿Eliminar este volante?')) return;
+  const handleEliminarGuardado = async (id: number) => {
+    if (!confirm('¿Eliminar este volante guardado?')) return;
     try {
       await eliminarVolante(id);
       await refrescar();
-      if (volanteId === id) handleNuevo();
+      if (volanteId === id) handleLimpiarTodo();
     } catch (e) {
       alert('Error al eliminar');
     }
@@ -327,7 +345,6 @@ export function VolanteTab() {
 
   const imprimir = () => window.print();
 
-  // Filas resueltas
   const filas = asignaciones.map((a) => {
     const unidad = unidades.find((u) => u.id === a.unidadFisicaId);
     const operador = personal.find((p) => p.id === a.operadorId);
@@ -337,9 +354,7 @@ export function VolanteTab() {
     return {
       ...a,
       unidadTexto: unidad
-        ? `${unidad.marca_modelo}${unidad.color ? ` ${unidad.color}` : ''}${
-            unidad.placas ? ` - ${unidad.placas}` : ''
-          }`
+        ? `${unidad.marca_modelo}${unidad.color ? ` ${unidad.color}` : ''}${unidad.placas ? ` - ${unidad.placas}` : ''}`
         : '',
       operadorTexto: operador?.nombre_completo ?? '',
       auxiliaresTexto: auxiliares.map((x) => x.nombre_completo).join(', '),
@@ -348,7 +363,6 @@ export function VolanteTab() {
 
   const esMultiple = filas.length > 1;
 
-  // Resumen
   const resumen = useMemo(() => {
     const operadoresUnicos = new Set(
       asignaciones.map((a) => a.operadorId).filter((x): x is number => !!x)
@@ -361,9 +375,7 @@ export function VolanteTab() {
       0
     );
     const costoTotal = asignaciones.reduce((sum, a) => {
-      const num = parseFloat(
-        String(a.costo).replace(/[^0-9.-]/g, '')
-      );
+      const num = parseFloat(String(a.costo).replace(/[^0-9.-]/g, ''));
       return sum + (isNaN(num) ? 0 : num);
     }, 0);
 
@@ -381,7 +393,6 @@ export function VolanteTab() {
       <div className="no-print">
         <h1>Volante de Registro</h1>
 
-        {/* Toggle vista */}
         <div
           className="subtabs-samsung"
           style={{ gridTemplateColumns: '1fr 1fr' }}
@@ -415,14 +426,13 @@ export function VolanteTab() {
                   </div>
                   <div className="card-subtitulo">
                     {v.fecha ? fechaISOATexto(v.fecha) : 'Sin fecha'} ·{' '}
-                    {Array.isArray(v.unidades) ? v.unidades.length : 0}{' '}
-                    unidad(es)
+                    {Array.isArray(v.unidades) ? v.unidades.length : 0} unidad(es)
                   </div>
                 </div>
                 <button
                   type="button"
                   className="btn-remove-punto"
-                  onClick={() => handleEliminar(v.id)}
+                  onClick={() => handleEliminarGuardado(v.id)}
                 >
                   ✕
                 </button>
@@ -538,10 +548,21 @@ export function VolanteTab() {
               </div>
             </div>
 
-            {/* Multi-select unidades */}
+            {/* Unidades */}
             <div className="form-card">
-              <div className="form-section-titulo">
-                Unidades ({unidadesSeleccionadas.length} seleccionadas)
+              <div className="asignacion-titulo-bloque">
+                <div className="form-section-titulo" style={{ margin: 0, border: 0, padding: 0 }}>
+                  Unidades ({unidadesSeleccionadas.length} seleccionadas)
+                </div>
+                {unidadesSeleccionadas.length > 0 && (
+                  <button
+                    type="button"
+                    className="btn-borrar-todo"
+                    onClick={quitarTodasLasUnidades}
+                  >
+                    🗑️ Quitar todas
+                  </button>
+                )}
               </div>
 
               {unidades.length > 6 && (
@@ -594,7 +615,7 @@ export function VolanteTab() {
               )}
             </div>
 
-            {/* Asignaciones por unidad */}
+            {/* Asignaciones */}
             {asignaciones.map((a, index) => {
               const unidadObj = unidades.find(
                 (u) => u.id === a.unidadFisicaId
@@ -613,14 +634,24 @@ export function VolanteTab() {
                         {unidadObj?.placas ? ` · ${unidadObj.placas}` : ''}
                       </span>
                     </div>
-                    <button
-                      type="button"
-                      className="btn-duplicar"
-                      onClick={() => duplicarAsignacion(a.id)}
-                      title="Duplicar esta asignación"
-                    >
-                      📋 Duplicar
-                    </button>
+                    <div className="asignacion-acciones">
+                      <button
+                        type="button"
+                        className="btn-duplicar"
+                        onClick={() => duplicarAsignacion(a.id)}
+                        title="Duplicar esta asignación"
+                      >
+                        📋 Duplicar
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-quitar-unidad"
+                        onClick={() => quitarUnidadDesdeAsignacion(a.id)}
+                        title="Quitar esta unidad"
+                      >
+                        🗑️
+                      </button>
+                    </div>
                   </div>
 
                   <div className="row-2">
@@ -658,7 +689,18 @@ export function VolanteTab() {
                   </div>
 
                   <div className="form-group">
-                    <label>Auxiliares (múltiples)</label>
+                    <label className="label-con-accion">
+                      <span>Auxiliares (múltiples)</span>
+                      {a.auxiliaresIds.length > 0 && (
+                        <button
+                          type="button"
+                          className="btn-limpiar-inline"
+                          onClick={() => limpiarAuxiliares(a.id)}
+                        >
+                          🗑️ Quitar todos
+                        </button>
+                      )}
+                    </label>
                     {auxiliaresDisponibles.length > 6 && (
                       <div className="filtro-input" style={{ marginBottom: 10 }}>
                         <input
@@ -805,10 +847,10 @@ export function VolanteTab() {
             <div className="volante-acciones">
               <button
                 type="button"
-                className="btn-secondary"
-                onClick={handleNuevo}
+                className="btn-danger-outline"
+                onClick={handleLimpiarTodo}
               >
-                Nuevo
+                🗑️ Limpiar todo
               </button>
               <button
                 type="button"
