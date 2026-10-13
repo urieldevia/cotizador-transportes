@@ -1033,4 +1033,423 @@ button.btn-accion.copiado:hover {
   .resultado-totales .row.total {
     font-size: 21px;
   }
+  /* ============================================
+   TABS PRINCIPALES (Cotizador / Documentos)
+   ============================================ */
+.tabs-samsung {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  background: var(--bg-input);
+  padding: 5px;
+  border-radius: 22px;
+  margin-bottom: 24px;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tab-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 18px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tab-item:hover {
+  color: var(--text-primary);
+}
+
+.tab-item.active {
+  background: white;
+  color: var(--samsung-blue);
+  font-weight: 800;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 3px 10px rgba(0, 0, 0, 0.04);
+}
+
+.tab-icono {
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* ============================================
+   DOCUMENTOS TAB
+   ============================================ */
+.documentos-tab h1 {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.subtabs-samsung {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  background: var(--bg-input);
+  padding: 4px;
+  border-radius: 18px;
+  margin-bottom: 24px;
+}
+
+.subtab-item {
+  padding: 12px 8px;
+  border: none;
+  background: transparent;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.subtab-item.active {
+  background: white;
+  color: var(--samsung-blue);
+  font-weight: 800;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* ============================================
+   INFO DE UNIDAD
+   ============================================ */
+.unidad-info {
+  padding: 14px 16px;
+  background: var(--samsung-blue-light);
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+
+.unidad-info strong {
+  color: var(--samsung-blue);
+  font-weight: 800;
+}
+
+/* ============================================
+   PERSONAL LISTA (selección múltiple)
+   ============================================ */
+.personal-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.personal-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg-input);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.personal-item:hover {
+  background: var(--bg-input-hover);
+}
+
+.personal-item.activo {
+  background: var(--samsung-blue-light);
+  box-shadow: inset 0 0 0 2px var(--samsung-blue);
+}
+
+.personal-item input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--samsung-blue);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.personal-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.personal-nombre {
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.005em;
+}
+
+.personal-apodo {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.rol-badge {
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.rol-badge.rol-chofer {
+  background: rgba(0, 114, 222, 0.12);
+  color: var(--samsung-blue);
+}
+
+.rol-badge.rol-auxiliar {
+  background: rgba(33, 163, 102, 0.12);
+  color: var(--success);
+}
+
+.rol-badge.rol-ambos {
+  background: rgba(120, 80, 220, 0.12);
+  color: #7850dc;
+}
+
+/* ============================================
+   NOTAS TEXTAREA
+   ============================================ */
+.notas-textarea {
+  width: 100%;
+  padding: 14px 18px;
+  border: none;
+  border-radius: var(--radius-input);
+  font-size: 15px;
+  font-family: inherit;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  resize: vertical;
+  min-height: 80px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 500;
+}
+
+.notas-textarea:focus {
+  outline: none;
+  background: white;
+  box-shadow: 0 0 0 2px var(--samsung-blue);
+}
+
+.notas-textarea::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* ============================================
+   PREVIEW DEL TEXTO
+   ============================================ */
+.texto-preview {
+  font-family: 'SF Mono', 'Roboto Mono', 'Menlo', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #1a2b40;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+
+/* ============================================
+   ADMIN (unidades / personal)
+   ============================================ */
+.admin-seccion {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 0 4px;
+}
+
+.admin-header h2 {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.lista-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border-radius: 18px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s;
+}
+
+.card-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-titulo {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.card-subtitulo {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* ============================================
+   SELECTOR DE FECHA
+   ============================================ */
+.fecha-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.fecha-input {
+  flex: 1;
+  padding: 14px 18px;
+  border: none;
+  border-radius: var(--radius-input);
+  font-size: 15px;
+  font-family: inherit;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 500;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+}
+
+.fecha-input:focus {
+  outline: none;
+  background: white;
+  box-shadow: 0 0 0 2px var(--samsung-blue);
+}
+
+.fecha-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.btn-fecha-hoy {
+  padding: 14px 18px;
+  background: var(--samsung-blue-light);
+  color: var(--samsung-blue);
+  border: none;
+  border-radius: var(--radius-input);
+  font-size: 13.5px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: -0.005em;
+  flex-shrink: 0;
+}
+
+.btn-fecha-hoy:hover {
+  background: rgba(0, 114, 222, 0.18);
+}
+
+.btn-fecha-clear {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: none;
+  border-radius: var(--radius-input);
+  font-size: 14px;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.btn-fecha-clear:hover {
+  background: rgba(230, 57, 70, 0.18);
+}
+
+/* ============================================
+   RESPONSIVE PARA DOCUMENTOS
+   ============================================ */
+@media (max-width: 640px) {
+  .documentos-tab h1 {
+    font-size: 28px;
+  }
+
+  .tabs-samsung {
+    margin-bottom: 20px;
+  }
+
+  .tab-item {
+    font-size: 13.5px;
+    padding: 12px 10px;
+  }
+
+  .subtabs-samsung {
+    gap: 3px;
+  }
+
+  .subtab-item {
+    font-size: 12.5px;
+    padding: 10px 6px;
+  }
+
+  .personal-item {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .rol-badge {
+    font-size: 9px;
+    padding: 3px 8px;
+  }
+
+  .fecha-row {
+    flex-wrap: wrap;
+  }
+}
 }

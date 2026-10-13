@@ -42,3 +42,33 @@ export interface Ubicacion {
   estado: string;
   zona_base: boolean;
 }
+
+// ====== CATÁLOGOS ======
+
+export type RolPersonal = 'chofer' | 'auxiliar' | 'ambos' | 'sin_definir';
+
+export interface Propietario {
+  id: number;
+  nombre: string;
+  activo: boolean;
+}
+
+export interface UnidadFisica {
+  id: number;
+  propietario_id: number | null;
+  marca_modelo: string;
+  color: string | null;
+  placas: string | null;
+  tipo_unidad_id: number | null;
+  notas: string | null;
+  activo: boolean;
+}
+
+export interface Personal {
+  id: number;
+  nombre_completo: string;
+  apodo: string | null;
+  telefono: string | null;
+  rol: RolPersonal;
+  activo: boolean;
+}
