@@ -51,7 +51,7 @@ export function GenerarTexto() {
   const texto = useMemo(() => {
     if (!unidadFisica) return '';
 
-    const sep = '───────────────────────────';
+    const sep = '───────────────────────';
     const partes: string[] = [];
 
     partes.push(`🚛 ${NOMBRE_EMPRESA}`);
