@@ -118,88 +118,115 @@ body {
    TABS PRINCIPALES (Cotizador / Documentos)
    ============================================ */
 .tabs-samsung {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px;
-  background: var(--bg-input);
-  padding: 5px;
-  border-radius: 22px;
-  margin-bottom: 24px;
-  max-width: 420px;
-  margin-left: auto;
-  margin-right: auto;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 4px !important;
+  background: var(--bg-input) !important;
+  padding: 5px !important;
+  border-radius: var(--radius-pill) !important;
+  margin-bottom: 24px !important;
+  max-width: 460px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04) !important;
 }
 
-.tab-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px 16px;
-  border: none;
-  background: transparent;
-  border-radius: 18px;
-  font-size: 15px;
-  font-weight: 600;
-  font-family: inherit;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  letter-spacing: -0.005em;
+button.tab-item {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 14px 20px !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  border-radius: var(--radius-pill) !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  font-family: inherit !important;
+  color: var(--text-secondary) !important;
+  cursor: pointer !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  letter-spacing: -0.005em !important;
+  box-shadow: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  line-height: 1 !important;
+  min-width: 0 !important;
+  text-decoration: none !important;
 }
 
-.tab-item:hover {
-  color: var(--text-primary);
+button.tab-item:hover {
+  color: var(--text-primary) !important;
+  background: rgba(255, 255, 255, 0.5) !important;
 }
 
-.tab-item.active {
-  background: white;
-  color: var(--samsung-blue);
-  font-weight: 800;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 3px 10px rgba(0, 0, 0, 0.04);
+button.tab-item.active {
+  background: white !important;
+  color: var(--samsung-blue) !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+}
+
+button.tab-item.active:hover {
+  background: white !important;
+  color: var(--samsung-blue) !important;
 }
 
 .tab-icono {
-  font-size: 18px;
-  line-height: 1;
+  font-size: 18px !important;
+  line-height: 1 !important;
 }
 
 /* ============================================
    SUBTABS (Generar / Unidades / Personal)
    ============================================ */
 .subtabs-samsung {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
-  background: var(--bg-input);
-  padding: 4px;
-  border-radius: 18px;
-  margin-bottom: 24px;
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 4px !important;
+  background: var(--bg-input) !important;
+  padding: 5px !important;
+  border-radius: var(--radius-pill) !important;
+  margin-bottom: 24px !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04) !important;
 }
 
-.subtab-item {
-  padding: 12px 8px;
-  border: none;
-  background: transparent;
-  border-radius: 14px;
-  font-size: 14px;
-  font-weight: 600;
-  font-family: inherit;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  letter-spacing: -0.005em;
+button.subtab-item {
+  padding: 12px 12px !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  border-radius: var(--radius-pill) !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  font-family: inherit !important;
+  color: var(--text-secondary) !important;
+  cursor: pointer !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  letter-spacing: -0.005em !important;
+  box-shadow: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  line-height: 1 !important;
+  min-width: 0 !important;
 }
 
-.subtab-item:hover {
-  color: var(--text-primary);
+button.subtab-item:hover {
+  color: var(--text-primary) !important;
+  background: rgba(255, 255, 255, 0.5) !important;
 }
 
-.subtab-item.active {
-  background: white;
-  color: var(--samsung-blue);
-  font-weight: 800;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+button.subtab-item.active {
+  background: white !important;
+  color: var(--samsung-blue) !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+}
+
+button.subtab-item.active:hover {
+  background: white !important;
+  color: var(--samsung-blue) !important;
 }
 
 /* ============================================
@@ -1437,18 +1464,18 @@ button.btn-accion.copiado:hover {
     margin-bottom: 20px;
   }
 
-  .tab-item {
-    font-size: 13.5px;
-    padding: 12px 10px;
+  button.tab-item {
+    font-size: 13.5px !important;
+    padding: 12px 10px !important;
   }
 
   .subtabs-samsung {
-    gap: 3px;
+    gap: 3px !important;
   }
 
-  .subtab-item {
-    font-size: 12.5px;
-    padding: 10px 6px;
+  button.subtab-item {
+    font-size: 12.5px !important;
+    padding: 10px 6px !important;
   }
 
   .personal-item {
