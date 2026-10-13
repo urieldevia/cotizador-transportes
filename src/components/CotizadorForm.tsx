@@ -26,14 +26,13 @@ export function CotizadorForm() {
   const [montoManiobras, setMontoManiobras] = useState(0);
 
   const [conEstadia, setConEstadia] = useState(false);
-  const [diasEstadia, setDiasEstadia] = useState(1);
+  const [diasEstadia, setDiasEstadia] = useState(0);
   const [costoPorDia, setCostoPorDia] = useState(0);
 
   const [resultado, setResultado] = useState<CotizacionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const requestIdRef = useRef(0);
-  const timeoutRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     supabase
@@ -44,6 +43,7 @@ export function CotizadorForm() {
       .then(({ data }) => setUnidades(data ?? []));
   }, []);
 
+  // ====== CÁLCULO EN VIVO (sin debounce) ======
   useEffect(() => {
     if (!unidadId) {
       setResultado(null);
@@ -58,11 +58,9 @@ export function CotizadorForm() {
       return;
     }
 
-    if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
-    timeoutRef.current = window.setTimeout(async () => {
-      const currentId = ++requestIdRef.current;
-      setError(null);
+    const currentId = ++requestIdRef.current;
 
+    (async () => {
       try {
         const res = await calcularCotizacion({
           unidadId,
@@ -76,6 +74,7 @@ export function CotizadorForm() {
 
         if (currentId === requestIdRef.current) {
           setResultado(res);
+          setError(null);
         }
       } catch (e: unknown) {
         if (currentId === requestIdRef.current) {
@@ -83,11 +82,7 @@ export function CotizadorForm() {
           setResultado(null);
         }
       }
-    }, 400);
-
-    return () => {
-      if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
-    };
+    })();
   }, [
     unidadId,
     puntosCarga,
@@ -132,6 +127,7 @@ export function CotizadorForm() {
       <h1>Cotizador de Transporte</h1>
 
       <div className="form-card">
+        {/* Unidad */}
         <div className="form-group">
           <label>Tipo de Unidad</label>
           <select
@@ -147,6 +143,7 @@ export function CotizadorForm() {
           </select>
         </div>
 
+        {/* Puntos de carga */}
         <div className="puntos-seccion">
           <div className="puntos-header">Puntos de carga (opcional)</div>
 
@@ -165,14 +162,17 @@ export function CotizadorForm() {
                 <label>%</label>
                 <input
                   type="number"
+                  inputMode="numeric"
                   min={0}
                   max={200}
-                  value={punto.porcentaje}
+                  value={punto.porcentaje === 0 ? '' : punto.porcentaje}
                   onChange={(e) =>
                     actualizarCarga(idx, {
-                      porcentaje: Number(e.target.value) || 0,
+                      porcentaje:
+                        e.target.value === '' ? 0 : Number(e.target.value),
                     })
                   }
+                  placeholder="100"
                 />
               </div>
 
@@ -195,6 +195,7 @@ export function CotizadorForm() {
           </button>
         </div>
 
+        {/* Puntos de entrega */}
         <div className="puntos-seccion puntos-entrega">
           <div className="puntos-header puntos-header-entrega">
             <span className="puntos-icono-entrega">📍</span>
@@ -216,14 +217,17 @@ export function CotizadorForm() {
                 <label>%</label>
                 <input
                   type="number"
+                  inputMode="numeric"
                   min={0}
                   max={200}
-                  value={punto.porcentaje}
+                  value={punto.porcentaje === 0 ? '' : punto.porcentaje}
                   onChange={(e) =>
                     actualizarEntrega(idx, {
-                      porcentaje: Number(e.target.value) || 0,
+                      porcentaje:
+                        e.target.value === '' ? 0 : Number(e.target.value),
                     })
                   }
+                  placeholder="100"
                 />
               </div>
 
@@ -250,6 +254,7 @@ export function CotizadorForm() {
           </button>
         </div>
 
+        {/* Maniobras */}
         <div className="form-group">
           <label>Maniobras de carga y descarga</label>
           <div className="radio-vertical">
@@ -295,21 +300,25 @@ export function CotizadorForm() {
               <label>Monto de maniobras (opcional)</label>
               <input
                 type="number"
+                inputMode="numeric"
                 min={0}
-                value={montoManiobras || ''}
+                value={montoManiobras === 0 ? '' : montoManiobras}
                 onChange={(e) =>
-                  setMontoManiobras(Number(e.target.value) || 0)
+                  setMontoManiobras(
+                    e.target.value === '' ? 0 : Number(e.target.value)
+                  )
                 }
-                placeholder="Dejar en 0 si no aplica costo"
+                placeholder="Dejar vacío si no aplica costo"
               />
               <small className="hint">
-                Si dejas en 0, solo aparecerá "Más maniobras" en la descripción
-                sin costo extra
+                Si lo dejas vacío, solo aparecerá "Más maniobras" en la
+                descripción sin costo extra
               </small>
             </div>
           )}
         </div>
 
+        {/* Estadías */}
         <div className="seccion-estadia">
           <label className="checkbox-row">
             <input
@@ -318,7 +327,7 @@ export function CotizadorForm() {
               onChange={(e) => {
                 setConEstadia(e.target.checked);
                 if (!e.target.checked) {
-                  setDiasEstadia(1);
+                  setDiasEstadia(0);
                   setCostoPorDia(0);
                 }
               }}
@@ -333,21 +342,28 @@ export function CotizadorForm() {
                   <label>Días</label>
                   <input
                     type="number"
+                    inputMode="numeric"
                     min={0}
-                    value={diasEstadia}
+                    value={diasEstadia === 0 ? '' : diasEstadia}
                     onChange={(e) =>
-                      setDiasEstadia(Number(e.target.value) || 0)
+                      setDiasEstadia(
+                        e.target.value === '' ? 0 : Number(e.target.value)
+                      )
                     }
+                    placeholder="0"
                   />
                 </div>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label>Costo por día</label>
                   <input
                     type="number"
+                    inputMode="numeric"
                     min={0}
-                    value={costoPorDia || ''}
+                    value={costoPorDia === 0 ? '' : costoPorDia}
                     onChange={(e) =>
-                      setCostoPorDia(Number(e.target.value) || 0)
+                      setCostoPorDia(
+                        e.target.value === '' ? 0 : Number(e.target.value)
+                      )
                     }
                     placeholder="0"
                   />

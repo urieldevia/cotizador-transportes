@@ -35,25 +35,29 @@
 
 html, body {
   height: 100%;
+  min-height: 100%;
+  min-height: 100dvh;
+  background-color: #eef0f4;
 }
 
 body {
   font-family: 'SamsungOne', 'Samsung One UI', -apple-system, BlinkMacSystemFont,
     'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
-  background: var(--bg-app);
+  background: #eef0f4;
   background-image:
     radial-gradient(circle at 0% 0%, rgba(0, 114, 222, 0.06) 0%, transparent 40%),
     radial-gradient(circle at 100% 100%, rgba(120, 80, 220, 0.05) 0%, transparent 40%);
-  background-attachment: fixed;
   color: var(--text-primary);
   font-size: 15px;
   line-height: 1.5;
   letter-spacing: -0.01em;
-  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
 }
 
 #root {
-  min-height: 100vh;
+  min-height: 100dvh;
+  background: transparent;
 }
 
 /* ============================================
@@ -63,6 +67,8 @@ body {
   max-width: 720px;
   margin: 0 auto;
   padding: 56px 20px 120px;
+  min-height: 100dvh;
+  background: transparent;
 }
 
 .cotizador h1 {
@@ -410,6 +416,76 @@ body {
 }
 
 /* ============================================
+   SECCIÓN ENTREGA RESALTADA
+   ============================================ */
+.puntos-entrega {
+  background: linear-gradient(180deg, #eaf3fd 0%, #dbeafb 100%);
+  box-shadow:
+    inset 0 0 0 2px rgba(0, 114, 222, 0.18),
+    0 2px 8px rgba(0, 114, 222, 0.06);
+  position: relative;
+}
+
+.puntos-entrega::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #0072de 0%, #4a9eff 100%);
+  border-radius: 22px 22px 0 0;
+}
+
+.puntos-header-entrega {
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  color: var(--samsung-blue) !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: -0.015em !important;
+  padding-left: 0 !important;
+  margin-bottom: 16px !important;
+}
+
+.puntos-icono-entrega {
+  font-size: 18px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 114, 222, 0.3));
+}
+
+.puntos-entrega .selector-ubicacion input,
+.puntos-entrega .punto-pct input {
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 114, 222, 0.08);
+}
+
+.puntos-entrega .selector-ubicacion input:focus,
+.puntos-entrega .punto-pct input:focus {
+  box-shadow:
+    0 0 0 2px var(--samsung-blue),
+    0 2px 8px rgba(0, 114, 222, 0.15);
+}
+
+.puntos-entrega .punto-pct label {
+  color: var(--samsung-blue);
+}
+
+.btn-add-punto-entrega {
+  background: white !important;
+  color: var(--samsung-blue) !important;
+  font-weight: 800 !important;
+  box-shadow: 0 1px 3px rgba(0, 114, 222, 0.1) !important;
+}
+
+.btn-add-punto-entrega:hover {
+  background: var(--samsung-blue) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(0, 114, 222, 0.3) !important;
+}
+
+/* ============================================
    SECCIÓN OPCIONAL (legacy)
    ============================================ */
 .seccion-opcional {
@@ -580,10 +656,6 @@ body {
   flex-shrink: 0;
 }
 
-.radio-line input:checked + * {
-  font-weight: 700;
-}
-
 /* ============================================
    ROW-2 (dos columnas)
    ============================================ */
@@ -744,71 +816,71 @@ body {
 }
 
 /* ============================================
-   ACCIONES DE LA DESCRIPCIÓN
+   ACCIONES DE LA DESCRIPCIÓN (Copiar / WhatsApp)
    ============================================ */
 .descripcion-acciones {
-  display: flex;
-  gap: 10px;
-  margin-top: 18px;
-  padding-top: 18px;
-  border-top: 1px solid rgba(0, 114, 222, 0.12);
+  display: flex !important;
+  gap: 10px !important;
+  margin-top: 18px !important;
+  padding-top: 18px !important;
+  border-top: 1px solid rgba(0, 114, 222, 0.12) !important;
 }
 
 button.btn-accion {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 20px;
-  background: white;
-  color: var(--text-primary);
-  border: none;
-  border-radius: var(--radius-pill);
-  font-size: 13.5px;
-  font-weight: 700;
-  font-family: inherit;
-  letter-spacing: -0.005em;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  user-select: none;
-  line-height: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 10px 20px !important;
+  background: white !important;
+  color: var(--text-primary) !important;
+  border: none !important;
+  border-radius: var(--radius-pill) !important;
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  font-family: inherit !important;
+  letter-spacing: -0.005em !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  user-select: none !important;
+  line-height: 1 !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
 }
 
 button.btn-accion:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12) !important;
 }
 
 button.btn-accion:active {
-  transform: translateY(0) scale(0.97);
-  transition: transform 0.1s;
+  transform: translateY(0) scale(0.97) !important;
+  transition: transform 0.1s !important;
 }
 
 button.btn-accion svg {
-  flex-shrink: 0;
-  width: 15px;
-  height: 15px;
+  flex-shrink: 0 !important;
+  width: 15px !important;
+  height: 15px !important;
 }
 
 button.btn-accion.btn-whatsapp {
-  background: var(--success-bg);
-  color: var(--success);
+  background: var(--success-bg) !important;
+  color: var(--success) !important;
 }
 
 button.btn-accion.btn-whatsapp:hover {
-  background: rgba(33, 163, 102, 0.18);
+  background: rgba(33, 163, 102, 0.18) !important;
 }
 
 button.btn-accion.copiado {
-  background: var(--success-bg);
-  color: var(--success);
+  background: var(--success-bg) !important;
+  color: var(--success) !important;
 }
 
 button.btn-accion.copiado:hover {
-  background: rgba(33, 163, 102, 0.18);
+  background: rgba(33, 163, 102, 0.18) !important;
 }
 
 /* ============================================
@@ -844,11 +916,55 @@ button.btn-accion.copiado:hover {
 }
 
 /* ============================================
+   ESTADÍA
+   ============================================ */
+.seccion-estadia {
+  margin-bottom: 22px;
+  padding: 18px 16px;
+  background: var(--bg-elevated);
+  border-radius: 22px;
+}
+
+.seccion-estadia .checkbox-row {
+  margin-bottom: 0;
+}
+
+.estadia-total {
+  margin-top: 14px;
+  padding: 12px 16px;
+  background: var(--samsung-blue-light);
+  color: var(--samsung-blue);
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.estadia-total strong {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+/* ============================================
    RESPONSIVE
    ============================================ */
 @media (max-width: 640px) {
+  html, body {
+    min-height: 100dvh;
+    background-color: #eef0f4;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
   .app {
-    padding: 32px 14px 100px;
+    padding-top: max(24px, env(safe-area-inset-top));
+    padding-bottom: max(100px, env(safe-area-inset-bottom));
+    padding-left: max(14px, env(safe-area-inset-left));
+    padding-right: max(14px, env(safe-area-inset-right));
   }
 
   .cotizador h1 {
@@ -886,86 +1002,15 @@ button.btn-accion.copiado:hover {
   }
 
   .descripcion-acciones {
-    flex-direction: column;
+    flex-direction: column !important;
   }
 
   button.btn-accion {
-    width: 100%;
-    padding: 12px 18px;
+    width: 100% !important;
+    padding: 12px 18px !important;
   }
 
   .resultado-totales .row.total {
     font-size: 21px;
   }
-  /* ============================================
-   SECCIÓN ENTREGA RESALTADA
-   ============================================ */
-.puntos-entrega {
-  background: linear-gradient(180deg, #eaf3fd 0%, #dbeafb 100%);
-  box-shadow:
-    inset 0 0 0 2px rgba(0, 114, 222, 0.18),
-    0 2px 8px rgba(0, 114, 222, 0.06);
-  position: relative;
-}
-
-.puntos-entrega::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #0072de 0%, #4a9eff 100%);
-  border-radius: 22px 22px 0 0;
-}
-
-.puntos-header-entrega {
-  font-size: 16px !important;
-  font-weight: 800 !important;
-  color: var(--samsung-blue) !important;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  letter-spacing: -0.015em !important;
-  padding-left: 0 !important;
-  margin-bottom: 16px !important;
-}
-
-.puntos-icono-entrega {
-  font-size: 18px;
-  line-height: 1;
-  filter: drop-shadow(0 1px 2px rgba(0, 114, 222, 0.3));
-}
-
-/* Inputs dentro de la sección entrega: fondo blanco para contraste */
-.puntos-entrega .selector-ubicacion input,
-.puntos-entrega .punto-pct input {
-  background: white;
-  box-shadow: 0 1px 3px rgba(0, 114, 222, 0.08);
-}
-
-.puntos-entrega .selector-ubicacion input:focus,
-.puntos-entrega .punto-pct input:focus {
-  box-shadow:
-    0 0 0 2px var(--samsung-blue),
-    0 2px 8px rgba(0, 114, 222, 0.15);
-}
-
-.puntos-entrega .punto-pct label {
-  color: var(--samsung-blue);
-}
-
-/* Botón agregar entrega: más destacado */
-.btn-add-punto-entrega {
-  background: white !important;
-  color: var(--samsung-blue) !important;
-  font-weight: 800 !important;
-  box-shadow: 0 1px 3px rgba(0, 114, 222, 0.1) !important;
-}
-
-.btn-add-punto-entrega:hover {
-  background: var(--samsung-blue) !important;
-  color: white !important;
-  box-shadow: 0 4px 12px rgba(0, 114, 222, 0.3) !important;
-}
 }
