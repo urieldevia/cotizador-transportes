@@ -9,6 +9,7 @@ import {
 } from '../hooks/useVolantes';
 import { ParadasList } from './ParadasList';
 import type { AsignacionUnidad, Volante } from '../lib/types';
+import { normalizarTexto } from '../hooks/useUbicaciones';
 
 const MESES = [
   'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
@@ -32,7 +33,6 @@ function nuevaAsignacion(unidadFisicaId: number): AsignacionUnidad {
   };
 }
 
-// Convierte texto DD/MM/YYYY a ISO YYYY-MM-DD
 function fechaTextoAISO(texto: string): string {
   const m = texto.trim().match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/);
   if (!m) return '';
@@ -41,7 +41,6 @@ function fechaTextoAISO(texto: string): string {
   return `${y.padStart(4, '0')}-${mo.padStart(2, '0')}-${d.padStart(2, '0')}`;
 }
 
-// Convierte ISO a texto DD/MM/YYYY
 function fechaISOATexto(iso: string): string {
   if (!iso) return '';
   const [y, m, d] = iso.split('-');
@@ -62,18 +61,22 @@ export function VolanteTab() {
   const [origen, setOrigen] = useState('');
   const [registroA, setRegistroA] = useState('');
 
-  const [unidadesSeleccionadas, setUnidadesSeleccionadas] = useState<number[]>(
-    []
-  );
+  const [unidadesSeleccionadas, setUnidadesSeleccionadas] = useState<number[]>([]);
   const [asignaciones, setAsignaciones] = useState<AsignacionUnidad[]>([]);
 
   const [descripcionServicios, setDescripcionServicios] = useState('');
   const [descripcionCarga, setDescripcionCarga] = useState('');
 
+  // Filtros
+  const [filtroUnidades, setFiltroUnidades] = useState('');
+  const [filtroAuxiliares, setFiltroAuxiliares] = useState('');
+  const [clienteSugerenciasAbiertas, setClienteSugerenciasAbiertas] = useState(false);
+
   const [guardando, setGuardando] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
   const pickerFechaRef = useRef<HTMLInputElement>(null);
+  const clienteWrapRef = useRef<HTMLDivElement>(null);
 
   // Cargar folio inicial
   useEffect(() => {
@@ -82,14 +85,67 @@ export function VolanteTab() {
     }
   }, [vista, volanteId]);
 
+  // Cerrar sugerencias de cliente al hacer click fuera
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (
+        clienteWrapRef.current &&
+        !clienteWrapRef.current.contains(e.target as Node)
+      ) {
+        setClienteSugerenciasAbiertas(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
   const operadores = useMemo(
     () => personal.filter((p) => p.rol === 'chofer' || p.rol === 'ambos'),
     [personal]
   );
-  const auxiliaresDisponibles = useMemo(
-    () => personal.filter((p) => p.rol === 'auxiliar' || p.rol === 'ambos'),
-    [personal]
-  );
+  const auxiliaresDisponibles = useMemo(() => {
+    const base = personal.filter(
+      (p) => p.rol === 'auxiliar' || p.rol === 'ambos'
+    );
+    if (!filtroAuxiliares.trim()) return base;
+    const q = normalizarTexto(filtroAuxiliares);
+    return base.filter(
+      (p) =>
+        normalizarTexto(p.nombre_completo).includes(q) ||
+        (p.apodo && normalizarTexto(p.apodo).includes(q))
+    );
+  }, [personal, filtroAuxiliares]);
+
+  const unidadesFiltradas = useMemo(() => {
+    if (!filtroUnidades.trim()) return unidades;
+    const q = normalizarTexto(filtroUnidades);
+    return unidades.filter((u) => {
+      const prop = propietarios.find((p) => p.id === u.propietario_id);
+      const texto = normalizarTexto(
+        `${u.marca_modelo} ${u.color || ''} ${u.placas || ''} ${
+          prop?.nombre || ''
+        }`
+      );
+      return texto.includes(q);
+    });
+  }, [unidades, propietarios, filtroUnidades]);
+
+  // Clientes únicos de volantes previos
+  const clientesHistoricos = useMemo(() => {
+    const set = new Set<string>();
+    volantes.forEach((v) => {
+      if (v.cliente && v.cliente.trim()) set.add(v.cliente.trim());
+    });
+    return Array.from(set).sort();
+  }, [volantes]);
+
+  const clientesSugeridos = useMemo(() => {
+    if (!cliente.trim() || cliente.length < 2) return [];
+    const q = normalizarTexto(cliente);
+    return clientesHistoricos
+      .filter((c) => normalizarTexto(c).includes(q))
+      .slice(0, 6);
+  }, [cliente, clientesHistoricos]);
 
   const fechaISO = useMemo(() => fechaTextoAISO(fechaTexto), [fechaTexto]);
 
@@ -99,31 +155,47 @@ export function VolanteTab() {
     return `${parseInt(d)} DE ${MESES[parseInt(m) - 1]} DE ${y}`;
   }, [fechaISO]);
 
-  // === Multi-selección de unidades ===
+  // === Unidades ===
   const toggleUnidad = (unidadId: number) => {
     setUnidadesSeleccionadas((prev) => {
       const yaEsta = prev.includes(unidadId);
       if (yaEsta) {
-        // Quitar
         setAsignaciones((as) =>
           as.filter((a) => a.unidadFisicaId !== unidadId)
         );
         return prev.filter((x) => x !== unidadId);
       } else {
-        // Agregar
         setAsignaciones((as) => [...as, nuevaAsignacion(unidadId)]);
         return [...prev, unidadId];
       }
     });
   };
 
-  const actualizarAsignacion = (
-    id: string,
-    patch: Partial<AsignacionUnidad>
-  ) => {
+  const actualizarAsignacion = (id: string, patch: Partial<AsignacionUnidad>) => {
     setAsignaciones((prev) =>
       prev.map((a) => (a.id === id ? { ...a, ...patch } : a))
     );
+  };
+
+  const duplicarAsignacion = (id: string) => {
+    const orig = asignaciones.find((a) => a.id === id);
+    if (!orig) return;
+    const copia: AsignacionUnidad = {
+      ...orig,
+      id: Math.random().toString(36).substring(2, 9),
+      paradas: orig.paradas.map((p) => ({
+        ...p,
+        id: Math.random().toString(36).substring(2, 9),
+      })),
+    };
+    setAsignaciones((prev) => [...prev, copia]);
+    if (orig.unidadFisicaId) {
+      setUnidadesSeleccionadas((prev) =>
+        prev.includes(orig.unidadFisicaId!)
+          ? prev
+          : [...prev, orig.unidadFisicaId!]
+      );
+    }
   };
 
   const toggleAuxiliar = (asignacionId: string, personalId: number) => {
@@ -147,27 +219,21 @@ export function VolanteTab() {
     actualizarAsignacion(id, { destino: anterior.destino });
   };
 
-  // === Fecha: picker nativo ===
+  // Fecha
   const abrirPicker = () => {
     pickerFechaRef.current?.showPicker?.();
     pickerFechaRef.current?.click();
   };
-
   const onFechaPickerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const iso = e.target.value;
-    if (iso) {
-      setFechaTexto(fechaISOATexto(iso));
-    }
+    if (iso) setFechaTexto(fechaISOATexto(iso));
   };
-
   const normalizarFechaTexto = () => {
     const iso = fechaTextoAISO(fechaTexto);
-    if (iso) {
-      setFechaTexto(fechaISOATexto(iso));
-    }
+    if (iso) setFechaTexto(fechaISOATexto(iso));
   };
 
-  // === Guardar ===
+  // Guardar
   const handleGuardar = async () => {
     if (!folio.trim()) {
       setMsg('El folio es obligatorio');
@@ -219,6 +285,8 @@ export function VolanteTab() {
     setAsignaciones([]);
     setDescripcionServicios('');
     setDescripcionCarga('');
+    setFiltroUnidades('');
+    setFiltroAuxiliares('');
     setVista('nuevo');
     setMsg(null);
     const f = await obtenerSiguienteFolio();
@@ -259,7 +327,7 @@ export function VolanteTab() {
 
   const imprimir = () => window.print();
 
-  // === Filas resueltas para impresión ===
+  // Filas resueltas
   const filas = asignaciones.map((a) => {
     const unidad = unidades.find((u) => u.id === a.unidadFisicaId);
     const operador = personal.find((p) => p.id === a.operadorId);
@@ -279,6 +347,34 @@ export function VolanteTab() {
   });
 
   const esMultiple = filas.length > 1;
+
+  // Resumen
+  const resumen = useMemo(() => {
+    const operadoresUnicos = new Set(
+      asignaciones.map((a) => a.operadorId).filter((x): x is number => !!x)
+    ).size;
+    const auxiliaresUnicos = new Set(
+      asignaciones.flatMap((a) => a.auxiliaresIds)
+    ).size;
+    const totalParadas = asignaciones.reduce(
+      (sum, a) => sum + a.paradas.length,
+      0
+    );
+    const costoTotal = asignaciones.reduce((sum, a) => {
+      const num = parseFloat(
+        String(a.costo).replace(/[^0-9.-]/g, '')
+      );
+      return sum + (isNaN(num) ? 0 : num);
+    }, 0);
+
+    return {
+      totalUnidades: asignaciones.length,
+      operadoresUnicos,
+      auxiliaresUnicos,
+      totalParadas,
+      costoTotal,
+    };
+  }, [asignaciones]);
 
   return (
     <div className="volante-tab">
@@ -318,10 +414,9 @@ export function VolanteTab() {
                     {v.folio} · {v.cliente || 'Sin cliente'}
                   </div>
                   <div className="card-subtitulo">
-                    {v.fecha
-                      ? fechaISOATexto(v.fecha)
-                      : 'Sin fecha'}{' '}
-                    · {Array.isArray(v.unidades) ? v.unidades.length : 0} unidad(es)
+                    {v.fecha ? fechaISOATexto(v.fecha) : 'Sin fecha'} ·{' '}
+                    {Array.isArray(v.unidades) ? v.unidades.length : 0}{' '}
+                    unidad(es)
                   </div>
                 </div>
                 <button
@@ -366,7 +461,6 @@ export function VolanteTab() {
                       type="button"
                       className="btn-picker-fecha"
                       onClick={abrirPicker}
-                      title="Abrir calendario"
                     >
                       📅
                     </button>
@@ -385,12 +479,37 @@ export function VolanteTab() {
               <div className="row-2">
                 <div className="form-group">
                   <label>Cliente</label>
-                  <input
-                    type="text"
-                    value={cliente}
-                    onChange={(e) => setCliente(e.target.value.toUpperCase())}
-                    placeholder="Ingresa el nombre del cliente"
-                  />
+                  <div className="cliente-autocomplete" ref={clienteWrapRef}>
+                    <input
+                      type="text"
+                      value={cliente}
+                      onChange={(e) => {
+                        setCliente(e.target.value.toUpperCase());
+                        setClienteSugerenciasAbiertas(true);
+                      }}
+                      onFocus={() => setClienteSugerenciasAbiertas(true)}
+                      placeholder="Buscar o escribir cliente..."
+                      autoComplete="off"
+                    />
+                    {clienteSugerenciasAbiertas &&
+                      clientesSugeridos.length > 0 && (
+                        <div className="cliente-sugerencias">
+                          {clientesSugeridos.map((c) => (
+                            <button
+                              key={c}
+                              type="button"
+                              className="cliente-sugerencia"
+                              onClick={() => {
+                                setCliente(c);
+                                setClienteSugerenciasAbiertas(false);
+                              }}
+                            >
+                              {c}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                  </div>
                 </div>
                 <div className="form-group">
                   <label>Registró</label>
@@ -425,8 +544,19 @@ export function VolanteTab() {
                 Unidades ({unidadesSeleccionadas.length} seleccionadas)
               </div>
 
+              {unidades.length > 6 && (
+                <div className="filtro-input">
+                  <input
+                    type="text"
+                    value={filtroUnidades}
+                    onChange={(e) => setFiltroUnidades(e.target.value)}
+                    placeholder="🔍 Buscar unidad, placas o propietario..."
+                  />
+                </div>
+              )}
+
               <div className="unidades-chips">
-                {unidades.map((u) => {
+                {unidadesFiltradas.map((u) => {
                   const activo = unidadesSeleccionadas.includes(u.id);
                   const prop = propietarios.find(
                     (p) => p.id === u.propietario_id
@@ -451,17 +581,10 @@ export function VolanteTab() {
                     </button>
                   );
                 })}
+                {unidadesFiltradas.length === 0 && (
+                  <div className="hint">Sin resultados para esa búsqueda</div>
+                )}
               </div>
-
-              {unidadesSeleccionadas.length > 0 && (
-                <div className="unidades-seleccionadas">
-                  <div className="unidades-seleccionadas-header">
-                    ✓ {unidadesSeleccionadas.length} unidad
-                    {unidadesSeleccionadas.length > 1 ? 'es' : ''} seleccionada
-                    {unidadesSeleccionadas.length > 1 ? 's' : ''}
-                  </div>
-                </div>
-              )}
 
               {unidadesSeleccionadas.length === 0 && (
                 <div className="hint" style={{ marginTop: 14 }}>
@@ -471,7 +594,7 @@ export function VolanteTab() {
               )}
             </div>
 
-            {/* Asignaciones por unidad seleccionada */}
+            {/* Asignaciones por unidad */}
             {asignaciones.map((a, index) => {
               const unidadObj = unidades.find(
                 (u) => u.id === a.unidadFisicaId
@@ -479,14 +602,25 @@ export function VolanteTab() {
               return (
                 <div key={a.id} className="form-card asignacion-card-master">
                   <div className="asignacion-titulo">
-                    <span className="asignacion-num-big">
-                      Unidad {index + 1}
-                    </span>
-                    <span className="asignacion-unidad-texto">
-                      {unidadObj?.marca_modelo}
-                      {unidadObj?.color ? ` ${unidadObj.color}` : ''}
-                      {unidadObj?.placas ? ` · ${unidadObj.placas}` : ''}
-                    </span>
+                    <div>
+                      <span className="asignacion-num-big">
+                        Unidad {index + 1}
+                      </span>
+                      <span className="asignacion-unidad-texto">
+                        {' '}
+                        {unidadObj?.marca_modelo}
+                        {unidadObj?.color ? ` ${unidadObj.color}` : ''}
+                        {unidadObj?.placas ? ` · ${unidadObj.placas}` : ''}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn-duplicar"
+                      onClick={() => duplicarAsignacion(a.id)}
+                      title="Duplicar esta asignación"
+                    >
+                      📋 Duplicar
+                    </button>
                   </div>
 
                   <div className="row-2">
@@ -525,6 +659,16 @@ export function VolanteTab() {
 
                   <div className="form-group">
                     <label>Auxiliares (múltiples)</label>
+                    {auxiliaresDisponibles.length > 6 && (
+                      <div className="filtro-input" style={{ marginBottom: 10 }}>
+                        <input
+                          type="text"
+                          value={filtroAuxiliares}
+                          onChange={(e) => setFiltroAuxiliares(e.target.value)}
+                          placeholder="🔍 Buscar auxiliar..."
+                        />
+                      </div>
+                    )}
                     <div className="auxiliares-chips">
                       {auxiliaresDisponibles.map((p) => {
                         const activo = a.auxiliaresIds.includes(p.id);
@@ -578,6 +722,52 @@ export function VolanteTab() {
                 </div>
               );
             })}
+
+            {/* Resumen */}
+            {asignaciones.length > 0 && (
+              <div className="form-card resumen-card">
+                <div className="form-section-titulo">Resumen</div>
+                <div className="resumen-grid">
+                  <div className="resumen-item">
+                    <span className="resumen-label">Total unidades</span>
+                    <span className="resumen-valor">
+                      {resumen.totalUnidades}
+                    </span>
+                  </div>
+                  <div className="resumen-item">
+                    <span className="resumen-label">Operadores únicos</span>
+                    <span className="resumen-valor">
+                      {resumen.operadoresUnicos}
+                    </span>
+                  </div>
+                  <div className="resumen-item">
+                    <span className="resumen-label">Auxiliares únicos</span>
+                    <span className="resumen-valor">
+                      {resumen.auxiliaresUnicos}
+                    </span>
+                  </div>
+                  <div className="resumen-item">
+                    <span className="resumen-label">Total paradas</span>
+                    <span className="resumen-valor">
+                      {resumen.totalParadas}
+                    </span>
+                  </div>
+                  {resumen.costoTotal > 0 && (
+                    <div className="resumen-item resumen-item-total">
+                      <span className="resumen-label">Costo total</span>
+                      <span className="resumen-valor">
+                        {new Intl.NumberFormat('es-MX', {
+                          style: 'currency',
+                          currency: 'MXN',
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0,
+                        }).format(resumen.costoTotal)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Descripciones */}
             <div className="form-card">
@@ -644,7 +834,7 @@ export function VolanteTab() {
         )}
       </div>
 
-      {/* ====== IMPRIMIBLE ====== */}
+      {/* IMPRIMIBLE */}
       {vista === 'nuevo' && (
         <div className="volante-print-area">
           <div className="volante-doc">
