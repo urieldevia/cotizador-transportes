@@ -1014,3 +1014,25 @@ button.btn-accion.copiado:hover {
     font-size: 21px;
   }
 }
+/* ============================================
+   NAVEGACIÓN CON TECLADO — ESTADO ACTIVO
+   ============================================ */
+.dropdown-item.activo,
+.dropdown-item.activo:focus {
+  background: var(--samsung-blue) !important;
+  color: white !important;
+  outline: none;
+}
+
+.dropdown-item.activo strong {
+  color: white;
+}
+
+.dropdown-item.activo .muted {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* Hint de accesibilidad para usuarios de teclado */
+.selector-ubicacion input:focus {
+  box-shadow: 0 0 0 2px var(--samsung-blue);
+}
