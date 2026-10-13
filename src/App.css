@@ -2082,4 +2082,200 @@ button.btn-accion.copiado:hover {
     page-break-inside: avoid;
   }
 }
+/* ============================================
+   FECHA MIXTA (texto + picker)
+   ============================================ */
+.fecha-mixta {
+  position: relative;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.fecha-mixta input[type="text"] {
+  flex: 1;
+  padding: 14px 18px;
+  border: none;
+  border-radius: var(--radius-input);
+  font-size: 15px;
+  font-family: inherit;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.fecha-mixta input[type="text"]:focus {
+  outline: none;
+  background: white;
+  box-shadow: 0 0 0 2px var(--samsung-blue);
+}
+
+.btn-picker-fecha {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--samsung-blue-light);
+  border: none;
+  border-radius: var(--radius-input);
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.btn-picker-fecha:hover {
+  background: rgba(0, 114, 222, 0.2);
+}
+
+.hidden-date-input {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  border: none;
+}
+
+/* ============================================
+   MULTI-SELECT DE UNIDADES (chips)
+   ============================================ */
+.unidades-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.unidad-chip {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--bg-input);
+  border: 2px solid transparent;
+  border-radius: 16px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+}
+
+.unidad-chip:hover {
+  background: var(--bg-input-hover);
+}
+
+.unidad-chip.active {
+  background: var(--samsung-blue-light);
+  border-color: var(--samsung-blue);
+  box-shadow: 0 2px 8px rgba(0, 114, 222, 0.15);
+}
+
+.unidad-chip-titulo {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.005em;
+}
+
+.unidad-chip-placas {
+  padding: 4px 10px;
+  background: white;
+  color: var(--text-primary);
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.unidad-chip.active .unidad-chip-placas {
+  background: var(--samsung-blue);
+  color: white;
+}
+
+.unidad-chip-prop {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.unidad-chip.active .unidad-chip-prop {
+  color: var(--samsung-blue);
+}
+
+.unidades-seleccionadas {
+  margin-top: 14px;
+  padding: 12px 16px;
+  background: var(--samsung-blue-light);
+  border-radius: 14px;
+}
+
+.unidades-seleccionadas-header {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--samsung-blue);
+  letter-spacing: -0.005em;
+}
+
+/* ============================================
+   ASIGNACIÓN MASTER (cada unidad seleccionada)
+   ============================================ */
+.asignacion-card-master {
+  border-left: 4px solid var(--samsung-blue);
+  padding: 24px 22px 22px;
+}
+
+.asignacion-titulo {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(0, 114, 222, 0.12);
+  flex-wrap: wrap;
+}
+
+.asignacion-num-big {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--samsung-blue);
+  letter-spacing: -0.015em;
+}
+
+.asignacion-unidad-texto {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 640px) {
+  .unidad-chip {
+    grid-template-columns: 1fr auto;
+    gap: 6px;
+  }
+
+  .unidad-chip-prop {
+    grid-column: 1 / -1;
+    text-align: left;
+    margin-top: 2px;
+  }
+
+  .asignacion-card-master {
+    padding: 20px 16px 18px;
+  }
+
+  .btn-picker-fecha {
+    width: 44px;
+    height: 44px;
+  }
+}
 }

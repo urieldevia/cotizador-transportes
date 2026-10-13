@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useCatalogo } from '../hooks/useCatalogo';
 import {
   useVolantes,
+  obtenerSiguienteFolio,
   guardarVolante,
   actualizarVolante,
   eliminarVolante,
@@ -14,10 +15,15 @@ const MESES = [
   'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE',
 ];
 
-function nuevaAsignacion(): AsignacionUnidad {
+const REGISTRADORES = [
+  'RAFAEL RAMIREZ MORENO',
+  'ERICK RAMIREZ RONQUILLO',
+];
+
+function nuevaAsignacion(unidadFisicaId: number): AsignacionUnidad {
   return {
     id: Math.random().toString(36).substring(2, 9),
-    unidadFisicaId: null,
+    unidadFisicaId,
     operadorId: null,
     auxiliaresIds: [],
     destino: '',
@@ -26,31 +32,55 @@ function nuevaAsignacion(): AsignacionUnidad {
   };
 }
 
+// Convierte texto DD/MM/YYYY a ISO YYYY-MM-DD
+function fechaTextoAISO(texto: string): string {
+  const m = texto.trim().match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/);
+  if (!m) return '';
+  let [, d, mo, y] = m;
+  if (y.length === 2) y = '20' + y;
+  return `${y.padStart(4, '0')}-${mo.padStart(2, '0')}-${d.padStart(2, '0')}`;
+}
+
+// Convierte ISO a texto DD/MM/YYYY
+function fechaISOATexto(iso: string): string {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  if (!y || !m || !d) return '';
+  return `${d}/${m}/${y}`;
+}
+
 export function VolanteTab() {
-  const { unidades, personal } = useCatalogo();
+  const { unidades, personal, propietarios } = useCatalogo();
   const { volantes, refrescar } = useVolantes();
 
   const [vista, setVista] = useState<'nuevo' | 'guardados'>('nuevo');
   const [volanteId, setVolanteId] = useState<number | null>(null);
 
-  // Info general
   const [folio, setFolio] = useState('');
-  const [fecha, setFecha] = useState('');
+  const [fechaTexto, setFechaTexto] = useState('');
   const [cliente, setCliente] = useState('');
   const [origen, setOrigen] = useState('');
   const [registroA, setRegistroA] = useState('');
 
-  // Asignaciones
-  const [asignaciones, setAsignaciones] = useState<AsignacionUnidad[]>([
-    nuevaAsignacion(),
-  ]);
+  const [unidadesSeleccionadas, setUnidadesSeleccionadas] = useState<number[]>(
+    []
+  );
+  const [asignaciones, setAsignaciones] = useState<AsignacionUnidad[]>([]);
 
-  // Descripciones
   const [descripcionServicios, setDescripcionServicios] = useState('');
   const [descripcionCarga, setDescripcionCarga] = useState('');
 
   const [guardando, setGuardando] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+
+  const pickerFechaRef = useRef<HTMLInputElement>(null);
+
+  // Cargar folio inicial
+  useEffect(() => {
+    if (vista === 'nuevo' && !volanteId) {
+      obtenerSiguienteFolio().then(setFolio);
+    }
+  }, [vista, volanteId]);
 
   const operadores = useMemo(
     () => personal.filter((p) => p.rol === 'chofer' || p.rol === 'ambos'),
@@ -61,27 +91,39 @@ export function VolanteTab() {
     [personal]
   );
 
-  const fechaFormateada = useMemo(() => {
-    if (!fecha) return '';
-    const [y, m, d] = fecha.split('-');
-    if (!y || !m || !d) return '';
-    return `${parseInt(d)} DE ${MESES[parseInt(m) - 1]} DE ${y}`;
-  }, [fecha]);
+  const fechaISO = useMemo(() => fechaTextoAISO(fechaTexto), [fechaTexto]);
 
-  // === Manejo de asignaciones ===
-  const actualizarAsignacion = (id: string, patch: Partial<AsignacionUnidad>) => {
+  const fechaFormateada = useMemo(() => {
+    if (!fechaISO) return '';
+    const [y, m, d] = fechaISO.split('-');
+    return `${parseInt(d)} DE ${MESES[parseInt(m) - 1]} DE ${y}`;
+  }, [fechaISO]);
+
+  // === Multi-selección de unidades ===
+  const toggleUnidad = (unidadId: number) => {
+    setUnidadesSeleccionadas((prev) => {
+      const yaEsta = prev.includes(unidadId);
+      if (yaEsta) {
+        // Quitar
+        setAsignaciones((as) =>
+          as.filter((a) => a.unidadFisicaId !== unidadId)
+        );
+        return prev.filter((x) => x !== unidadId);
+      } else {
+        // Agregar
+        setAsignaciones((as) => [...as, nuevaAsignacion(unidadId)]);
+        return [...prev, unidadId];
+      }
+    });
+  };
+
+  const actualizarAsignacion = (
+    id: string,
+    patch: Partial<AsignacionUnidad>
+  ) => {
     setAsignaciones((prev) =>
       prev.map((a) => (a.id === id ? { ...a, ...patch } : a))
     );
-  };
-
-  const agregarAsignacion = () => {
-    setAsignaciones((prev) => [...prev, nuevaAsignacion()]);
-  };
-
-  const eliminarAsignacion = (id: string) => {
-    if (asignaciones.length === 1) return;
-    setAsignaciones((prev) => prev.filter((a) => a.id !== id));
   };
 
   const toggleAuxiliar = (asignacionId: string, personalId: number) => {
@@ -99,12 +141,30 @@ export function VolanteTab() {
     );
   };
 
-  const heredarAnterior = (index: number) => {
+  const heredarDestino = (id: string, index: number) => {
     if (index === 0) return;
     const anterior = asignaciones[index - 1];
-    actualizarAsignacion(asignaciones[index].id, {
-      destino: anterior.destino,
-    });
+    actualizarAsignacion(id, { destino: anterior.destino });
+  };
+
+  // === Fecha: picker nativo ===
+  const abrirPicker = () => {
+    pickerFechaRef.current?.showPicker?.();
+    pickerFechaRef.current?.click();
+  };
+
+  const onFechaPickerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const iso = e.target.value;
+    if (iso) {
+      setFechaTexto(fechaISOATexto(iso));
+    }
+  };
+
+  const normalizarFechaTexto = () => {
+    const iso = fechaTextoAISO(fechaTexto);
+    if (iso) {
+      setFechaTexto(fechaISOATexto(iso));
+    }
   };
 
   // === Guardar ===
@@ -113,15 +173,19 @@ export function VolanteTab() {
       setMsg('El folio es obligatorio');
       return;
     }
+    if (asignaciones.length === 0) {
+      setMsg('Selecciona al menos una unidad');
+      return;
+    }
     setGuardando(true);
     setMsg(null);
 
     const payload = {
       folio: folio.trim(),
-      fecha: fecha || null,
-      cliente: cliente.trim(),
-      origen: origen.trim(),
-      registro_a: registroA.trim(),
+      fecha: fechaISO || null,
+      cliente: cliente.trim().toUpperCase(),
+      origen: origen.trim().toUpperCase(),
+      registro_a: registroA.trim().toUpperCase(),
       descripcion_servicios: descripcionServicios.trim(),
       descripcion_carga: descripcionCarga.trim(),
       unidades: asignaciones,
@@ -145,34 +209,40 @@ export function VolanteTab() {
     }
   };
 
-  const handleNuevo = () => {
+  const handleNuevo = async () => {
     setVolanteId(null);
-    setFolio('');
-    setFecha('');
+    setFechaTexto('');
     setCliente('');
     setOrigen('');
     setRegistroA('');
-    setAsignaciones([nuevaAsignacion()]);
+    setUnidadesSeleccionadas([]);
+    setAsignaciones([]);
     setDescripcionServicios('');
     setDescripcionCarga('');
     setVista('nuevo');
     setMsg(null);
+    const f = await obtenerSiguienteFolio();
+    setFolio(f);
   };
 
   const cargarVolante = (v: Volante) => {
     setVolanteId(v.id);
     setFolio(v.folio);
-    setFecha(v.fecha || '');
+    setFechaTexto(fechaISOATexto(v.fecha || ''));
     setCliente(v.cliente || '');
     setOrigen(v.origen || '');
     setRegistroA(v.registro_a || '');
     setDescripcionServicios(v.descripcion_servicios || '');
     setDescripcionCarga(v.descripcion_carga || '');
-    setAsignaciones(
-      Array.isArray(v.unidades) && v.unidades.length > 0
-        ? v.unidades
-        : [nuevaAsignacion()]
+
+    const asigs = Array.isArray(v.unidades) ? v.unidades : [];
+    setAsignaciones(asigs);
+    setUnidadesSeleccionadas(
+      asigs
+        .map((a) => a.unidadFisicaId)
+        .filter((id): id is number => id !== null)
     );
+
     setVista('nuevo');
   };
 
@@ -189,7 +259,7 @@ export function VolanteTab() {
 
   const imprimir = () => window.print();
 
-  // === Filas resueltas ===
+  // === Filas resueltas para impresión ===
   const filas = asignaciones.map((a) => {
     const unidad = unidades.find((u) => u.id === a.unidadFisicaId);
     const operador = personal.find((p) => p.id === a.operadorId);
@@ -205,7 +275,6 @@ export function VolanteTab() {
         : '',
       operadorTexto: operador?.nombre_completo ?? '',
       auxiliaresTexto: auxiliares.map((x) => x.nombre_completo).join(', '),
-      auxiliaresNombres: auxiliares.map((x) => x.nombre_completo),
     };
   });
 
@@ -217,7 +286,10 @@ export function VolanteTab() {
         <h1>Volante de Registro</h1>
 
         {/* Toggle vista */}
-        <div className="subtabs-samsung" style={{ gridTemplateColumns: '1fr 1fr' }}>
+        <div
+          className="subtabs-samsung"
+          style={{ gridTemplateColumns: '1fr 1fr' }}
+        >
           <button
             type="button"
             className={`subtab-item ${vista === 'nuevo' ? 'active' : ''}`}
@@ -243,11 +315,11 @@ export function VolanteTab() {
               <div key={v.id} className="card-item">
                 <div className="card-info" onClick={() => cargarVolante(v)}>
                   <div className="card-titulo">
-                    Folio {v.folio} · {v.cliente || 'Sin cliente'}
+                    {v.folio} · {v.cliente || 'Sin cliente'}
                   </div>
                   <div className="card-subtitulo">
                     {v.fecha
-                      ? new Date(v.fecha + 'T00:00:00').toLocaleDateString('es-MX')
+                      ? fechaISOATexto(v.fecha)
                       : 'Sin fecha'}{' '}
                     · {Array.isArray(v.unidades) ? v.unidades.length : 0} unidad(es)
                   </div>
@@ -256,7 +328,6 @@ export function VolanteTab() {
                   type="button"
                   className="btn-remove-punto"
                   onClick={() => handleEliminar(v.id)}
-                  title="Eliminar"
                 >
                   ✕
                 </button>
@@ -278,16 +349,36 @@ export function VolanteTab() {
                     type="text"
                     value={folio}
                     onChange={(e) => setFolio(e.target.value)}
-                    placeholder="0532"
+                    placeholder="VOLANT-754"
                   />
                 </div>
                 <div className="form-group">
                   <label>Fecha</label>
-                  <input
-                    type="date"
-                    value={fecha}
-                    onChange={(e) => setFecha(e.target.value)}
-                  />
+                  <div className="fecha-mixta">
+                    <input
+                      type="text"
+                      value={fechaTexto}
+                      onChange={(e) => setFechaTexto(e.target.value)}
+                      onBlur={normalizarFechaTexto}
+                      placeholder="DD/MM/AAAA"
+                    />
+                    <button
+                      type="button"
+                      className="btn-picker-fecha"
+                      onClick={abrirPicker}
+                      title="Abrir calendario"
+                    >
+                      📅
+                    </button>
+                    <input
+                      ref={pickerFechaRef}
+                      type="date"
+                      value={fechaISO}
+                      onChange={onFechaPickerChange}
+                      className="hidden-date-input"
+                      tabIndex={-1}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -298,17 +389,22 @@ export function VolanteTab() {
                     type="text"
                     value={cliente}
                     onChange={(e) => setCliente(e.target.value.toUpperCase())}
-                    placeholder="SIMA"
+                    placeholder="Ingresa el nombre del cliente"
                   />
                 </div>
                 <div className="form-group">
-                  <label>Registió</label>
-                  <input
-                    type="text"
+                  <label>Registró</label>
+                  <select
                     value={registroA}
-                    onChange={(e) => setRegistroA(e.target.value.toUpperCase())}
-                    placeholder="RAFAEL RAMIREZ MORENO"
-                  />
+                    onChange={(e) => setRegistroA(e.target.value)}
+                  >
+                    <option value="">Seleccionar...</option>
+                    {REGISTRADORES.map((r) => (
+                      <option key={r} value={r}>
+                        {r}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -318,52 +414,79 @@ export function VolanteTab() {
                   type="text"
                   value={origen}
                   onChange={(e) => setOrigen(e.target.value.toUpperCase())}
-                  placeholder="XOCHIMILCO"
+                  placeholder="Ingresa dirección de carga u origen"
                 />
               </div>
             </div>
 
-            {/* Unidades */}
+            {/* Multi-select unidades */}
             <div className="form-card">
               <div className="form-section-titulo">
-                Unidades asignadas ({asignaciones.length})
+                Unidades ({unidadesSeleccionadas.length} seleccionadas)
               </div>
 
-              {asignaciones.map((a, index) => (
-                <div key={a.id} className="asignacion-card">
-                  <div className="asignacion-header">
-                    <span className="asignacion-num">Unidad {index + 1}</span>
-                    {asignaciones.length > 1 && (
-                      <button
-                        type="button"
-                        className="btn-remove-punto"
-                        style={{ width: 32, height: 32 }}
-                        onClick={() => eliminarAsignacion(a.id)}
-                      >
-                        ✕
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="form-group">
-                    <label>Unidad física</label>
-                    <select
-                      value={a.unidadFisicaId ?? ''}
-                      onChange={(e) =>
-                        actualizarAsignacion(a.id, {
-                          unidadFisicaId: Number(e.target.value) || null,
-                        })
-                      }
+              <div className="unidades-chips">
+                {unidades.map((u) => {
+                  const activo = unidadesSeleccionadas.includes(u.id);
+                  const prop = propietarios.find(
+                    (p) => p.id === u.propietario_id
+                  );
+                  return (
+                    <button
+                      key={u.id}
+                      type="button"
+                      className={`unidad-chip ${activo ? 'active' : ''}`}
+                      onClick={() => toggleUnidad(u.id)}
                     >
-                      <option value="">Seleccionar unidad...</option>
-                      {unidades.map((u) => (
-                        <option key={u.id} value={u.id}>
-                          {u.marca_modelo}
-                          {u.color ? ` ${u.color}` : ''}
-                          {u.placas ? ` · ${u.placas}` : ''}
-                        </option>
-                      ))}
-                    </select>
+                      <span className="unidad-chip-titulo">
+                        {u.marca_modelo}
+                        {u.color ? ` ${u.color}` : ''}
+                      </span>
+                      {u.placas && (
+                        <span className="unidad-chip-placas">{u.placas}</span>
+                      )}
+                      {prop && (
+                        <span className="unidad-chip-prop">{prop.nombre}</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {unidadesSeleccionadas.length > 0 && (
+                <div className="unidades-seleccionadas">
+                  <div className="unidades-seleccionadas-header">
+                    ✓ {unidadesSeleccionadas.length} unidad
+                    {unidadesSeleccionadas.length > 1 ? 'es' : ''} seleccionada
+                    {unidadesSeleccionadas.length > 1 ? 's' : ''}
+                  </div>
+                </div>
+              )}
+
+              {unidadesSeleccionadas.length === 0 && (
+                <div className="hint" style={{ marginTop: 14 }}>
+                  Toca una o varias unidades para asignarles operador y
+                  trazabilidad
+                </div>
+              )}
+            </div>
+
+            {/* Asignaciones por unidad seleccionada */}
+            {asignaciones.map((a, index) => {
+              const unidadObj = unidades.find(
+                (u) => u.id === a.unidadFisicaId
+              );
+              return (
+                <div key={a.id} className="form-card asignacion-card-master">
+                  <div className="asignacion-titulo">
+                    <span className="asignacion-num-big">
+                      Unidad {index + 1}
+                    </span>
+                    <span className="asignacion-unidad-texto">
+                      {unidadObj?.marca_modelo}
+                      {unidadObj?.color ? ` ${unidadObj.color}` : ''}
+                      {unidadObj?.placas ? ` · ${unidadObj.placas}` : ''}
+                    </span>
                   </div>
 
                   <div className="row-2">
@@ -391,7 +514,9 @@ export function VolanteTab() {
                         type="text"
                         value={a.costo}
                         onChange={(e) =>
-                          actualizarAsignacion(a.id, { costo: e.target.value })
+                          actualizarAsignacion(a.id, {
+                            costo: e.target.value,
+                          })
                         }
                         placeholder="$5,000"
                       />
@@ -407,7 +532,9 @@ export function VolanteTab() {
                           <button
                             key={p.id}
                             type="button"
-                            className={`auxiliar-chip ${activo ? 'active' : ''}`}
+                            className={`auxiliar-chip ${
+                              activo ? 'active' : ''
+                            }`}
                             onClick={() => toggleAuxiliar(a.id, p.id)}
                           >
                             {p.nombre_completo}
@@ -424,7 +551,7 @@ export function VolanteTab() {
                         <button
                           type="button"
                           className="btn-heredar"
-                          onClick={() => heredarAnterior(index)}
+                          onClick={() => heredarDestino(a.id, index)}
                         >
                           ↑ Heredar anterior
                         </button>
@@ -442,7 +569,6 @@ export function VolanteTab() {
                     />
                   </div>
 
-                  {/* Trazabilidad */}
                   <ParadasList
                     paradas={a.paradas}
                     onChange={(paradas) =>
@@ -450,16 +576,8 @@ export function VolanteTab() {
                     }
                   />
                 </div>
-              ))}
-
-              <button
-                type="button"
-                className="btn-add-punto btn-add-punto-entrega"
-                onClick={agregarAsignacion}
-              >
-                + Agregar otra unidad
-              </button>
-            </div>
+              );
+            })}
 
             {/* Descripciones */}
             <div className="form-card">
@@ -508,7 +626,11 @@ export function VolanteTab() {
                 onClick={handleGuardar}
                 disabled={guardando}
               >
-                {guardando ? 'Guardando...' : volanteId ? 'Actualizar' : 'Guardar'}
+                {guardando
+                  ? 'Guardando...'
+                  : volanteId
+                  ? 'Actualizar'
+                  : 'Guardar'}
               </button>
               <button
                 type="button"
@@ -522,7 +644,7 @@ export function VolanteTab() {
         )}
       </div>
 
-      {/* ====== ÁREA IMPRIMIBLE ====== */}
+      {/* ====== IMPRIMIBLE ====== */}
       {vista === 'nuevo' && (
         <div className="volante-print-area">
           <div className="volante-doc">
@@ -535,7 +657,7 @@ export function VolanteTab() {
                 <div className="volante-subtitulo">REMISION DE SERVICIO</div>
               </div>
               <div className="volante-folio-fecha">
-                <div className="volante-folio">{folio || '0000'}</div>
+                <div className="volante-folio">{folio || 'VOLANT-000'}</div>
                 <div className="volante-fecha-caja">
                   <div className="volante-fecha-label">FECHA</div>
                   <div className="volante-fecha-valor">
@@ -592,7 +714,6 @@ export function VolanteTab() {
               </tbody>
             </table>
 
-            {/* Trazabilidad por unidad */}
             {filas.some((f) => f.paradas.length > 0) && (
               <>
                 <div className="volante-tabla-titulo">

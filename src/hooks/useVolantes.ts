@@ -30,6 +30,30 @@ export function useVolantes() {
   return { volantes, cargando, refrescar };
 }
 
+export async function obtenerSiguienteFolio(): Promise<string> {
+  const { data } = await supabase
+    .from('volantes')
+    .select('folio')
+    .like('folio', 'VOLANT-%')
+    .order('id', { ascending: false })
+    .limit(20);
+
+  let siguiente = 754;
+  if (data && data.length > 0) {
+    const numeros = data
+      .map((v) => {
+        const m = v.folio.match(/VOLANT-(\d+)/);
+        return m ? parseInt(m[1]) : 0;
+      })
+      .filter((n) => n > 0);
+
+    if (numeros.length > 0) {
+      siguiente = Math.max(...numeros) + 1;
+    }
+  }
+  return `VOLANT-${siguiente}`;
+}
+
 export async function guardarVolante(
   data: Omit<Volante, 'id' | 'created_at' | 'updated_at'>
 ): Promise<number> {
