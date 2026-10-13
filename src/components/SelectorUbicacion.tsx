@@ -20,8 +20,10 @@ export function SelectorUbicacion({
   const [abierto, setAbierto] = useState(false);
   const [seleccionado, setSeleccionado] = useState<Ubicacion | null>(null);
   const [indiceActivo, setIndiceActivo] = useState(-1);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const listaRef = useRef<HTMLDivElement>(null);
+  const cerrandoTimerRef = useRef<number | undefined>(undefined);
 
   // Sincronizar valor externo
   useEffect(() => {
@@ -43,84 +45,114 @@ export function SelectorUbicacion({
     return buscarUbicaciones(ubicaciones, query, 20);
   }, [ubicaciones, query]);
 
-  // Resetear índice activo cuando cambian los resultados
+  // Reset índice activo al cambiar resultados
   useEffect(() => {
-    setIndiceActivo(-1);
+    setIndiceActivo(resultados.length > 0 ? 0 : -1);
   }, [resultados.length]);
 
   // Auto-scroll al elemento activo
   useEffect(() => {
     if (indiceActivo >= 0 && listaRef.current) {
-      const items = listaRef.current.querySelectorAll('.dropdown-item');
-      const item = items[indiceActivo] as HTMLElement;
+      const items = listaRef.current.querySelectorAll<HTMLElement>(
+        '.dropdown-item'
+      );
+      const item = items[indiceActivo];
       if (item) {
-        item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        item.scrollIntoView({ block: 'nearest' });
       }
     }
   }, [indiceActivo]);
 
+  const cancelarCierre = () => {
+    if (cerrandoTimerRef.current) {
+      window.clearTimeout(cerrandoTimerRef.current);
+      cerrandoTimerRef.current = undefined;
+    }
+  };
+
+  const programarCierre = () => {
+    cancelarCierre();
+    cerrandoTimerRef.current = window.setTimeout(() => {
+      setAbierto(false);
+      setIndiceActivo(-1);
+    }, 220);
+  };
+
   const seleccionarOpcion = (op: Ubicacion) => {
+    cancelarCierre();
     onChange(op.id);
     setSeleccionado(op);
     setQuery(`${op.poblacion}, ${op.estado}`);
     setAbierto(false);
     setIndiceActivo(-1);
+    inputRef.current?.focus();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Si el dropdown no está abierto, abrir con flecha abajo
-    if (!abierto && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
-      if (resultados.length > 0) {
+    const hayResultados = resultados.length > 0;
+
+    // Si el dropdown no está abierto y el usuario presiona ↓, abrirlo
+    if (!abierto) {
+      if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && hayResultados) {
         e.preventDefault();
+        e.stopPropagation();
         setAbierto(true);
         setIndiceActivo(0);
+        return;
       }
       return;
     }
 
-    if (!abierto) return;
-
     switch (e.key) {
       case 'ArrowDown': {
         e.preventDefault();
-        setIndiceActivo((prev) => {
-          if (resultados.length === 0) return -1;
-          return prev < resultados.length - 1 ? prev + 1 : 0;
-        });
-        break;
+        e.stopPropagation();
+        if (!hayResultados) return;
+        setIndiceActivo((prev) => (prev < resultados.length - 1 ? prev + 1 : 0));
+        return;
       }
 
       case 'ArrowUp': {
         e.preventDefault();
-        setIndiceActivo((prev) => {
-          if (resultados.length === 0) return -1;
-          return prev > 0 ? prev - 1 : resultados.length - 1;
-        });
-        break;
+        e.stopPropagation();
+        if (!hayResultados) return;
+        setIndiceActivo((prev) => (prev > 0 ? prev - 1 : resultados.length - 1));
+        return;
+      }
+
+      case 'Home': {
+        e.preventDefault();
+        if (hayResultados) setIndiceActivo(0);
+        return;
+      }
+
+      case 'End': {
+        e.preventDefault();
+        if (hayResultados) setIndiceActivo(resultados.length - 1);
+        return;
       }
 
       case 'Enter': {
         e.preventDefault();
-        if (indiceActivo >= 0 && resultados[indiceActivo]) {
-          seleccionarOpcion(resultados[indiceActivo]);
-        } else if (resultados.length > 0) {
-          seleccionarOpcion(resultados[0]);
-        }
-        break;
+        e.stopPropagation();
+        if (!hayResultados) return;
+        const activo = indiceActivo >= 0 ? indiceActivo : 0;
+        seleccionarOpcion(resultados[activo]);
+        return;
       }
 
       case 'Escape': {
         e.preventDefault();
+        e.stopPropagation();
         setAbierto(false);
         setIndiceActivo(-1);
-        break;
+        return;
       }
 
       case 'Tab': {
-        // Cerrar sin seleccionar al salir del campo
         setAbierto(false);
         setIndiceActivo(-1);
-        break;
+        return;
       }
     }
   };
@@ -135,31 +167,23 @@ export function SelectorUbicacion({
         onChange={(e) => {
           setQuery(e.target.value);
           setAbierto(true);
-          setIndiceActivo(-1);
           if (seleccionado) {
             setSeleccionado(null);
             onChange(0);
           }
         }}
-        onFocus={() => setAbierto(true)}
-        onBlur={() => {
-          setTimeout(() => setAbierto(false), 180);
+        onFocus={() => {
+          cancelarCierre();
+          setAbierto(true);
         }}
+        onBlur={programarCierre}
         onKeyDown={handleKeyDown}
         placeholder={placeholder ?? 'Buscar población o estado...'}
         autoComplete="off"
-        role="combobox"
-        aria-expanded={abierto}
-        aria-autocomplete="list"
-        aria-controls="ubicacion-listbox"
+        spellCheck={false}
       />
       {abierto && query.length >= 2 && (
-        <div
-          className="dropdown"
-          ref={listaRef}
-          role="listbox"
-          id="ubicacion-listbox"
-        >
+        <div className="dropdown" ref={listaRef}>
           {cargandoLista && (
             <div className="dropdown-item muted">Cargando ubicaciones...</div>
           )}
@@ -170,11 +194,7 @@ export function SelectorUbicacion({
             <button
               key={op.id}
               type="button"
-              role="option"
-              aria-selected={indiceActivo === idx}
-              className={`dropdown-item ${
-                indiceActivo === idx ? 'activo' : ''
-              }`}
+              className={`dropdown-item ${indiceActivo === idx ? 'activo' : ''}`}
               onMouseDown={(e) => e.preventDefault()}
               onMouseEnter={() => setIndiceActivo(idx)}
               onClick={() => seleccionarOpcion(op)}
