@@ -10,7 +10,7 @@ export function DocumentosTab() {
 
   return (
     <div className="documentos-tab">
-      <h1>Documentos</h1>
+      <h1>Datos</h1>
 
       <div className="subtabs-samsung">
         <button

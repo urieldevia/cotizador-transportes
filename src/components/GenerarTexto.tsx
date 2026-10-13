@@ -4,6 +4,13 @@ import type { Personal } from '../lib/types';
 
 const NOMBRE_EMPRESA = 'TRANSPORTES RAMÍREZ';
 
+function etiquetaRolCorto(rol: string): string {
+  if (rol === 'chofer') return 'Chofer';
+  if (rol === 'auxiliar') return 'Auxiliar';
+  if (rol === 'ambos') return 'Chofer/Aux';
+  return '';
+}
+
 export function GenerarTexto() {
   const { unidades, personal, propietarios } = useCatalogo();
   const [unidadFisicaId, setUnidadFisicaId] = useState<number | null>(null);
@@ -21,6 +28,12 @@ export function GenerarTexto() {
     if (!unidadFisica?.propietario_id) return null;
     return propietarios.find((p) => p.id === unidadFisica.propietario_id);
   }, [unidadFisica, propietarios]);
+
+  const personalSeleccionado = useMemo(() => {
+    return seleccionados
+      .map((id) => personal.find((p) => p.id === id))
+      .filter((p): p is Personal => !!p);
+  }, [seleccionados, personal]);
 
   const togglePersonal = (id: number) => {
     setSeleccionados((prev) =>
@@ -62,14 +75,10 @@ export function GenerarTexto() {
     partes.push('👥 PERSONAL ASIGNADO:');
     partes.push(sepFino);
 
-    const listaPersonal = seleccionados
-      .map((id) => personal.find((p) => p.id === id))
-      .filter((p): p is Personal => !!p);
-
-    if (listaPersonal.length === 0) {
+    if (personalSeleccionado.length === 0) {
       partes.push('  (sin personal asignado)');
     } else {
-      for (const p of listaPersonal) {
+      for (const p of personalSeleccionado) {
         partes.push(`  • ${p.nombre_completo}`);
       }
     }
@@ -89,7 +98,7 @@ export function GenerarTexto() {
     partes.push(sepGrueso);
 
     return partes.join('\n');
-  }, [unidadFisica, seleccionados, personal, notas, fechaFormateada]);
+  }, [unidadFisica, personalSeleccionado, notas, fechaFormateada]);
 
   const copiar = async () => {
     try {
@@ -163,7 +172,7 @@ export function GenerarTexto() {
         )}
       </div>
 
-      {/* Personal */}
+      {/* Personal con desglose */}
       <div className="form-card">
         <div className="form-group" style={{ marginBottom: 12 }}>
           <label>Personal asignado</label>
@@ -193,17 +202,36 @@ export function GenerarTexto() {
                 </div>
                 {p.rol !== 'sin_definir' && (
                   <span className={`rol-badge rol-${p.rol}`}>
-                    {p.rol === 'chofer'
-                      ? 'Chofer'
-                      : p.rol === 'auxiliar'
-                      ? 'Auxiliar'
-                      : 'Chofer/Aux'}
+                    {etiquetaRolCorto(p.rol)}
                   </span>
                 )}
               </label>
             );
           })}
         </div>
+
+        {/* Desglose de seleccionados (como el de unidad) */}
+        {personalSeleccionado.length > 0 && (
+          <div className="personal-seleccionado">
+            <div className="personal-seleccionado-header">
+              👥 Personal seleccionado ({personalSeleccionado.length})
+            </div>
+            <div className="personal-seleccionado-lista">
+              {personalSeleccionado.map((p) => (
+                <div key={p.id} className="personal-seleccionado-item">
+                  <span className="personal-seleccionado-nombre">
+                    {p.nombre_completo}
+                  </span>
+                  {p.rol !== 'sin_definir' && (
+                    <span className={`rol-badge rol-${p.rol}`}>
+                      {etiquetaRolCorto(p.rol)}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Fecha */}

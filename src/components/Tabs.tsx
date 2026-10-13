@@ -19,8 +19,8 @@ export function Tabs({ activo, onChange }: Props) {
         className={`tab-item ${activo === 'documentos' ? 'active' : ''}`}
         onClick={() => onChange('documentos')}
       >
-        <span className="tab-icono">📝</span>
-        Documentos
+        <span className="tab-icono">📋</span>
+        Datos
       </button>
     </div>
   );
