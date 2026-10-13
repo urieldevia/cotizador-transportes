@@ -72,3 +72,38 @@ export interface Personal {
   rol: RolPersonal;
   activo: boolean;
 }
+// ====== VOLANTES ======
+
+export type TipoParada = 'carga' | 'descarga';
+
+export interface Parada {
+  id: string;
+  tipo: TipoParada;
+  direccion: string;
+  hora: string;
+  notas: string;
+}
+
+export interface AsignacionUnidad {
+  id: string;
+  unidadFisicaId: number | null;
+  operadorId: number | null;
+  auxiliaresIds: number[];
+  destino: string;
+  costo: string;
+  paradas: Parada[];
+}
+
+export interface Volante {
+  id: number;
+  folio: string;
+  fecha: string | null;
+  cliente: string;
+  origen: string;
+  registro_a: string;
+  descripcion_servicios: string;
+  descripcion_carga: string;
+  unidades: AsignacionUnidad[];
+  created_at: string;
+  updated_at: string;
+}

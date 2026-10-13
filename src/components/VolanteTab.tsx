@@ -1,57 +1,64 @@
 import { useState, useMemo } from 'react';
 import { useCatalogo } from '../hooks/useCatalogo';
+import {
+  useVolantes,
+  guardarVolante,
+  actualizarVolante,
+  eliminarVolante,
+} from '../hooks/useVolantes';
+import { ParadasList } from './ParadasList';
+import type { AsignacionUnidad, Volante } from '../lib/types';
 
 const MESES = [
-  'ENERO',
-  'FEBRERO',
-  'MARZO',
-  'ABRIL',
-  'MAYO',
-  'JUNIO',
-  'JULIO',
-  'AGOSTO',
-  'SEPTIEMBRE',
-  'OCTUBRE',
-  'NOVIEMBRE',
-  'DICIEMBRE',
+  'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
+  'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE',
 ];
+
+function nuevaAsignacion(): AsignacionUnidad {
+  return {
+    id: Math.random().toString(36).substring(2, 9),
+    unidadFisicaId: null,
+    operadorId: null,
+    auxiliaresIds: [],
+    destino: '',
+    costo: '',
+    paradas: [],
+  };
+}
 
 export function VolanteTab() {
   const { unidades, personal } = useCatalogo();
+  const { volantes, refrescar } = useVolantes();
 
+  const [vista, setVista] = useState<'nuevo' | 'guardados'>('nuevo');
+  const [volanteId, setVolanteId] = useState<number | null>(null);
+
+  // Info general
   const [folio, setFolio] = useState('');
   const [fecha, setFecha] = useState('');
-  const [origen, setOrigen] = useState('');
-  const [destino, setDestino] = useState('');
   const [cliente, setCliente] = useState('');
+  const [origen, setOrigen] = useState('');
   const [registroA, setRegistroA] = useState('');
-  const [unidadFisicaId, setUnidadFisicaId] = useState<number | null>(null);
-  const [operadorId, setOperadorId] = useState<number | null>(null);
-  const [auxiliarId, setAuxiliarId] = useState<number | null>(null);
-  const [costo, setCosto] = useState('');
+
+  // Asignaciones
+  const [asignaciones, setAsignaciones] = useState<AsignacionUnidad[]>([
+    nuevaAsignacion(),
+  ]);
+
+  // Descripciones
   const [descripcionServicios, setDescripcionServicios] = useState('');
   const [descripcionCarga, setDescripcionCarga] = useState('');
+
+  const [guardando, setGuardando] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
 
   const operadores = useMemo(
     () => personal.filter((p) => p.rol === 'chofer' || p.rol === 'ambos'),
     [personal]
   );
-  const auxiliares = useMemo(
+  const auxiliaresDisponibles = useMemo(
     () => personal.filter((p) => p.rol === 'auxiliar' || p.rol === 'ambos'),
     [personal]
-  );
-
-  const unidadFisica = useMemo(
-    () => unidades.find((u) => u.id === unidadFisicaId) || null,
-    [unidades, unidadFisicaId]
-  );
-  const operador = useMemo(
-    () => personal.find((p) => p.id === operadorId) || null,
-    [personal, operadorId]
-  );
-  const auxiliar = useMemo(
-    () => personal.find((p) => p.id === auxiliarId) || null,
-    [personal, auxiliarId]
   );
 
   const fechaFormateada = useMemo(() => {
@@ -61,286 +68,588 @@ export function VolanteTab() {
     return `${parseInt(d)} DE ${MESES[parseInt(m) - 1]} DE ${y}`;
   }, [fecha]);
 
-  const nombreUnidad = unidadFisica
-    ? `${unidadFisica.marca_modelo}${
-        unidadFisica.color ? ` ${unidadFisica.color}` : ''
-      }`
-    : '';
-
-  const imprimir = () => {
-    window.print();
+  // === Manejo de asignaciones ===
+  const actualizarAsignacion = (id: string, patch: Partial<AsignacionUnidad>) => {
+    setAsignaciones((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, ...patch } : a))
+    );
   };
 
-  const limpiar = () => {
-    if (!confirm('¿Limpiar todos los campos?')) return;
+  const agregarAsignacion = () => {
+    setAsignaciones((prev) => [...prev, nuevaAsignacion()]);
+  };
+
+  const eliminarAsignacion = (id: string) => {
+    if (asignaciones.length === 1) return;
+    setAsignaciones((prev) => prev.filter((a) => a.id !== id));
+  };
+
+  const toggleAuxiliar = (asignacionId: string, personalId: number) => {
+    setAsignaciones((prev) =>
+      prev.map((a) => {
+        if (a.id !== asignacionId) return a;
+        const yaEsta = a.auxiliaresIds.includes(personalId);
+        return {
+          ...a,
+          auxiliaresIds: yaEsta
+            ? a.auxiliaresIds.filter((x) => x !== personalId)
+            : [...a.auxiliaresIds, personalId],
+        };
+      })
+    );
+  };
+
+  const heredarAnterior = (index: number) => {
+    if (index === 0) return;
+    const anterior = asignaciones[index - 1];
+    actualizarAsignacion(asignaciones[index].id, {
+      destino: anterior.destino,
+    });
+  };
+
+  // === Guardar ===
+  const handleGuardar = async () => {
+    if (!folio.trim()) {
+      setMsg('El folio es obligatorio');
+      return;
+    }
+    setGuardando(true);
+    setMsg(null);
+
+    const payload = {
+      folio: folio.trim(),
+      fecha: fecha || null,
+      cliente: cliente.trim(),
+      origen: origen.trim(),
+      registro_a: registroA.trim(),
+      descripcion_servicios: descripcionServicios.trim(),
+      descripcion_carga: descripcionCarga.trim(),
+      unidades: asignaciones,
+    };
+
+    try {
+      if (volanteId) {
+        await actualizarVolante(volanteId, payload);
+        setMsg('✓ Volante actualizado');
+      } else {
+        const id = await guardarVolante(payload);
+        setVolanteId(id);
+        setMsg('✓ Volante guardado');
+      }
+      await refrescar();
+      setTimeout(() => setMsg(null), 2500);
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : 'Error al guardar');
+    } finally {
+      setGuardando(false);
+    }
+  };
+
+  const handleNuevo = () => {
+    setVolanteId(null);
     setFolio('');
     setFecha('');
-    setOrigen('');
-    setDestino('');
     setCliente('');
+    setOrigen('');
     setRegistroA('');
-    setUnidadFisicaId(null);
-    setOperadorId(null);
-    setAuxiliarId(null);
-    setCosto('');
+    setAsignaciones([nuevaAsignacion()]);
     setDescripcionServicios('');
     setDescripcionCarga('');
+    setVista('nuevo');
+    setMsg(null);
   };
+
+  const cargarVolante = (v: Volante) => {
+    setVolanteId(v.id);
+    setFolio(v.folio);
+    setFecha(v.fecha || '');
+    setCliente(v.cliente || '');
+    setOrigen(v.origen || '');
+    setRegistroA(v.registro_a || '');
+    setDescripcionServicios(v.descripcion_servicios || '');
+    setDescripcionCarga(v.descripcion_carga || '');
+    setAsignaciones(
+      Array.isArray(v.unidades) && v.unidades.length > 0
+        ? v.unidades
+        : [nuevaAsignacion()]
+    );
+    setVista('nuevo');
+  };
+
+  const handleEliminar = async (id: number) => {
+    if (!confirm('¿Eliminar este volante?')) return;
+    try {
+      await eliminarVolante(id);
+      await refrescar();
+      if (volanteId === id) handleNuevo();
+    } catch (e) {
+      alert('Error al eliminar');
+    }
+  };
+
+  const imprimir = () => window.print();
+
+  // === Filas resueltas ===
+  const filas = asignaciones.map((a) => {
+    const unidad = unidades.find((u) => u.id === a.unidadFisicaId);
+    const operador = personal.find((p) => p.id === a.operadorId);
+    const auxiliares = a.auxiliaresIds
+      .map((id) => personal.find((p) => p.id === id))
+      .filter((p): p is NonNullable<typeof p> => !!p);
+    return {
+      ...a,
+      unidadTexto: unidad
+        ? `${unidad.marca_modelo}${unidad.color ? ` ${unidad.color}` : ''}${
+            unidad.placas ? ` - ${unidad.placas}` : ''
+          }`
+        : '',
+      operadorTexto: operador?.nombre_completo ?? '',
+      auxiliaresTexto: auxiliares.map((x) => x.nombre_completo).join(', '),
+      auxiliaresNombres: auxiliares.map((x) => x.nombre_completo),
+    };
+  });
+
+  const esMultiple = filas.length > 1;
 
   return (
     <div className="volante-tab">
       <div className="no-print">
         <h1>Volante de Registro</h1>
 
-        <div className="form-card">
-          <div className="row-2">
-            <div className="form-group">
-              <label>Folio</label>
-              <input
-                type="text"
-                value={folio}
-                onChange={(e) => setFolio(e.target.value)}
-                placeholder="0532"
-              />
-            </div>
-            <div className="form-group">
-              <label>Fecha</label>
-              <input
-                type="date"
-                value={fecha}
-                onChange={(e) => setFecha(e.target.value)}
-              />
-            </div>
-          </div>
+        {/* Toggle vista */}
+        <div className="subtabs-samsung" style={{ gridTemplateColumns: '1fr 1fr' }}>
+          <button
+            type="button"
+            className={`subtab-item ${vista === 'nuevo' ? 'active' : ''}`}
+            onClick={() => setVista('nuevo')}
+          >
+            {volanteId ? 'Editando' : 'Nuevo'}
+          </button>
+          <button
+            type="button"
+            className={`subtab-item ${vista === 'guardados' ? 'active' : ''}`}
+            onClick={() => setVista('guardados')}
+          >
+            Guardados ({volantes.length})
+          </button>
+        </div>
 
-          <div className="row-2">
-            <div className="form-group">
-              <label>Origen</label>
-              <input
-                type="text"
-                value={origen}
-                onChange={(e) => setOrigen(e.target.value.toUpperCase())}
-                placeholder="XOCHIMILCO"
-              />
-            </div>
-            <div className="form-group">
-              <label>Destino</label>
-              <input
-                type="text"
-                value={destino}
-                onChange={(e) => setDestino(e.target.value.toUpperCase())}
-                placeholder="REFORMA, 4450, GUADALAJARA JAL."
-              />
-            </div>
+        {vista === 'guardados' && (
+          <div className="volantes-lista">
+            {volantes.length === 0 && (
+              <div className="info-box">No hay volantes guardados aún</div>
+            )}
+            {volantes.map((v) => (
+              <div key={v.id} className="card-item">
+                <div className="card-info" onClick={() => cargarVolante(v)}>
+                  <div className="card-titulo">
+                    Folio {v.folio} · {v.cliente || 'Sin cliente'}
+                  </div>
+                  <div className="card-subtitulo">
+                    {v.fecha
+                      ? new Date(v.fecha + 'T00:00:00').toLocaleDateString('es-MX')
+                      : 'Sin fecha'}{' '}
+                    · {Array.isArray(v.unidades) ? v.unidades.length : 0} unidad(es)
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="btn-remove-punto"
+                  onClick={() => handleEliminar(v.id)}
+                  title="Eliminar"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
           </div>
+        )}
 
-          <div className="row-2">
-            <div className="form-group">
-              <label>Cliente</label>
-              <input
-                type="text"
-                value={cliente}
-                onChange={(e) => setCliente(e.target.value.toUpperCase())}
-                placeholder="SIMA"
-              />
-            </div>
-            <div className="form-group">
-              <label>Registró</label>
-              <input
-                type="text"
-                value={registroA}
-                onChange={(e) => setRegistroA(e.target.value.toUpperCase())}
-                placeholder="RAFAEL RAMIREZ MORENO"
-              />
-            </div>
-          </div>
+        {vista === 'nuevo' && (
+          <>
+            {/* Info general */}
+            <div className="form-card">
+              <div className="form-section-titulo">Información general</div>
 
-          <div className="form-group">
-            <label>Unidad</label>
-            <select
-              value={unidadFisicaId ?? ''}
-              onChange={(e) =>
-                setUnidadFisicaId(Number(e.target.value) || null)
-              }
-            >
-              <option value="">Seleccionar unidad...</option>
-              {unidades.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.marca_modelo}
-                  {u.color ? ` ${u.color}` : ''}
-                  {u.placas ? ` · ${u.placas}` : ''}
-                </option>
+              <div className="row-2">
+                <div className="form-group">
+                  <label>Folio</label>
+                  <input
+                    type="text"
+                    value={folio}
+                    onChange={(e) => setFolio(e.target.value)}
+                    placeholder="0532"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Fecha</label>
+                  <input
+                    type="date"
+                    value={fecha}
+                    onChange={(e) => setFecha(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="row-2">
+                <div className="form-group">
+                  <label>Cliente</label>
+                  <input
+                    type="text"
+                    value={cliente}
+                    onChange={(e) => setCliente(e.target.value.toUpperCase())}
+                    placeholder="SIMA"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Registió</label>
+                  <input
+                    type="text"
+                    value={registroA}
+                    onChange={(e) => setRegistroA(e.target.value.toUpperCase())}
+                    placeholder="RAFAEL RAMIREZ MORENO"
+                  />
+                </div>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label>Origen</label>
+                <input
+                  type="text"
+                  value={origen}
+                  onChange={(e) => setOrigen(e.target.value.toUpperCase())}
+                  placeholder="XOCHIMILCO"
+                />
+              </div>
+            </div>
+
+            {/* Unidades */}
+            <div className="form-card">
+              <div className="form-section-titulo">
+                Unidades asignadas ({asignaciones.length})
+              </div>
+
+              {asignaciones.map((a, index) => (
+                <div key={a.id} className="asignacion-card">
+                  <div className="asignacion-header">
+                    <span className="asignacion-num">Unidad {index + 1}</span>
+                    {asignaciones.length > 1 && (
+                      <button
+                        type="button"
+                        className="btn-remove-punto"
+                        style={{ width: 32, height: 32 }}
+                        onClick={() => eliminarAsignacion(a.id)}
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="form-group">
+                    <label>Unidad física</label>
+                    <select
+                      value={a.unidadFisicaId ?? ''}
+                      onChange={(e) =>
+                        actualizarAsignacion(a.id, {
+                          unidadFisicaId: Number(e.target.value) || null,
+                        })
+                      }
+                    >
+                      <option value="">Seleccionar unidad...</option>
+                      {unidades.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.marca_modelo}
+                          {u.color ? ` ${u.color}` : ''}
+                          {u.placas ? ` · ${u.placas}` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="row-2">
+                    <div className="form-group">
+                      <label>Operador</label>
+                      <select
+                        value={a.operadorId ?? ''}
+                        onChange={(e) =>
+                          actualizarAsignacion(a.id, {
+                            operadorId: Number(e.target.value) || null,
+                          })
+                        }
+                      >
+                        <option value="">Seleccionar operador...</option>
+                        {operadores.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.nombre_completo}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Costo</label>
+                      <input
+                        type="text"
+                        value={a.costo}
+                        onChange={(e) =>
+                          actualizarAsignacion(a.id, { costo: e.target.value })
+                        }
+                        placeholder="$5,000"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Auxiliares (múltiples)</label>
+                    <div className="auxiliares-chips">
+                      {auxiliaresDisponibles.map((p) => {
+                        const activo = a.auxiliaresIds.includes(p.id);
+                        return (
+                          <button
+                            key={p.id}
+                            type="button"
+                            className={`auxiliar-chip ${activo ? 'active' : ''}`}
+                            onClick={() => toggleAuxiliar(a.id, p.id)}
+                          >
+                            {p.nombre_completo}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>
+                      Destino
+                      {index > 0 && (
+                        <button
+                          type="button"
+                          className="btn-heredar"
+                          onClick={() => heredarAnterior(index)}
+                        >
+                          ↑ Heredar anterior
+                        </button>
+                      )}
+                    </label>
+                    <input
+                      type="text"
+                      value={a.destino}
+                      onChange={(e) =>
+                        actualizarAsignacion(a.id, {
+                          destino: e.target.value.toUpperCase(),
+                        })
+                      }
+                      placeholder="REFORMA, 4450, GUADALAJARA JAL."
+                    />
+                  </div>
+
+                  {/* Trazabilidad */}
+                  <ParadasList
+                    paradas={a.paradas}
+                    onChange={(paradas) =>
+                      actualizarAsignacion(a.id, { paradas })
+                    }
+                  />
+                </div>
               ))}
-            </select>
-          </div>
 
-          <div className="row-2">
-            <div className="form-group">
-              <label>Operador</label>
-              <select
-                value={operadorId ?? ''}
-                onChange={(e) =>
-                  setOperadorId(Number(e.target.value) || null)
-                }
+              <button
+                type="button"
+                className="btn-add-punto btn-add-punto-entrega"
+                onClick={agregarAsignacion}
               >
-                <option value="">Seleccionar operador...</option>
-                {operadores.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.nombre_completo}
-                  </option>
-                ))}
-              </select>
+                + Agregar otra unidad
+              </button>
             </div>
-            <div className="form-group">
-              <label>Auxiliar</label>
-              <select
-                value={auxiliarId ?? ''}
-                onChange={(e) =>
-                  setAuxiliarId(Number(e.target.value) || null)
-                }
+
+            {/* Descripciones */}
+            <div className="form-card">
+              <div className="form-section-titulo">Descripciones</div>
+
+              <div className="form-group">
+                <label>Descripción de servicios</label>
+                <textarea
+                  value={descripcionServicios}
+                  onChange={(e) =>
+                    setDescripcionServicios(e.target.value.toUpperCase())
+                  }
+                  placeholder="RECOLECCION EN SIMA EL DIA 11 Y ENTREGA EL DIA 12 EN GUADALAJARA"
+                  rows={2}
+                  className="notas-textarea"
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label>Descripción de carga</label>
+                <textarea
+                  value={descripcionCarga}
+                  onChange={(e) =>
+                    setDescripcionCarga(e.target.value.toUpperCase())
+                  }
+                  placeholder="EQUIPO MEDICO"
+                  rows={2}
+                  className="notas-textarea"
+                />
+              </div>
+            </div>
+
+            {msg && <div className="info-box">{msg}</div>}
+
+            <div className="volante-acciones">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={handleNuevo}
               >
-                <option value="">Sin auxiliar</option>
-                {auxiliares.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.nombre_completo}
-                  </option>
-                ))}
-              </select>
+                Nuevo
+              </button>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={handleGuardar}
+                disabled={guardando}
+              >
+                {guardando ? 'Guardando...' : volanteId ? 'Actualizar' : 'Guardar'}
+              </button>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={imprimir}
+              >
+                🖨️ Imprimir / PDF
+              </button>
             </div>
-          </div>
-
-          <div className="form-group">
-            <label>Costo</label>
-            <input
-              type="text"
-              value={costo}
-              onChange={(e) => setCosto(e.target.value)}
-              placeholder="Opcional"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Descripción de servicios</label>
-            <textarea
-              value={descripcionServicios}
-              onChange={(e) =>
-                setDescripcionServicios(e.target.value.toUpperCase())
-              }
-              placeholder="RECOLECCION EN SIMA EL DIA 11 Y ENTREGA EL DIA 12 EN GUADALAJARA"
-              rows={2}
-              className="notas-textarea"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Descripción de carga</label>
-            <textarea
-              value={descripcionCarga}
-              onChange={(e) =>
-                setDescripcionCarga(e.target.value.toUpperCase())
-              }
-              placeholder="EQUIPO MEDICO"
-              rows={2}
-              className="notas-textarea"
-            />
-          </div>
-        </div>
-
-        <div className="volante-acciones no-print">
-          <button type="button" className="btn-secondary" onClick={limpiar}>
-            Limpiar
-          </button>
-          <button type="button" className="btn-primary" onClick={imprimir}>
-            🖨️ Imprimir / PDF
-          </button>
-        </div>
+          </>
+        )}
       </div>
 
-      {/* Área imprimible */}
-      <div className="volante-print-area">
-        <div className="volante-doc">
-          {/* Encabezado */}
-          <div className="volante-header">
-            <div className="volante-logo">
-              <img src="/logo.png" alt="Logo" />
-            </div>
-
-            <div className="volante-titulo">
-              <div className="volante-empresa">TRANSPORTES RAMIREZ</div>
-              <div className="volante-subtitulo">REMISION DE SERVICIO</div>
-            </div>
-
-            <div className="volante-folio-fecha">
-              <div className="volante-folio">{folio || '0000'}</div>
-              <div className="volante-fecha-caja">
-                <div className="volante-fecha-label">FECHA</div>
-                <div className="volante-fecha-valor">
-                  {fechaFormateada || '—'}
+      {/* ====== ÁREA IMPRIMIBLE ====== */}
+      {vista === 'nuevo' && (
+        <div className="volante-print-area">
+          <div className="volante-doc">
+            <div className="volante-header">
+              <div className="volante-logo">
+                <img src="/logo.png" alt="Logo" />
+              </div>
+              <div className="volante-titulo">
+                <div className="volante-empresa">TRANSPORTES RAMIREZ</div>
+                <div className="volante-subtitulo">REMISION DE SERVICIO</div>
+              </div>
+              <div className="volante-folio-fecha">
+                <div className="volante-folio">{folio || '0000'}</div>
+                <div className="volante-fecha-caja">
+                  <div className="volante-fecha-label">FECHA</div>
+                  <div className="volante-fecha-valor">
+                    {fechaFormateada || '—'}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Cuadrícula de datos */}
-          <div className="volante-grid">
-            <div className="volante-fila">
-              <div className="volante-label">ORIGEN</div>
-              <div className="volante-valor">{origen}</div>
-            </div>
-            <div className="volante-fila">
-              <div className="volante-label">UNIDAD</div>
-              <div className="volante-valor">{nombreUnidad}</div>
-            </div>
-
-            <div className="volante-fila">
-              <div className="volante-label">DESTINO</div>
-              <div className="volante-valor">{destino}</div>
-            </div>
-            <div className="volante-fila">
-              <div className="volante-label">OPERADOR</div>
-              <div className="volante-valor">
-                {operador?.nombre_completo ?? ''}
+            <div className="volante-grid">
+              <div className="volante-fila">
+                <div className="volante-label">ORIGEN</div>
+                <div className="volante-valor">{origen}</div>
+              </div>
+              <div className="volante-fila">
+                <div className="volante-label">CLIENTE</div>
+                <div className="volante-valor">{cliente}</div>
+              </div>
+              <div className="volante-fila">
+                <div className="volante-label">REGISTRO A</div>
+                <div className="volante-valor">{registroA}</div>
+              </div>
+              <div className="volante-fila">
+                <div className="volante-label">UNIDADES</div>
+                <div className="volante-valor">{filas.length}</div>
               </div>
             </div>
 
-            <div className="volante-fila">
-              <div className="volante-label">CLIENTE</div>
-              <div className="volante-valor">{cliente}</div>
+            <div className="volante-tabla-titulo">
+              {esMultiple ? 'UNIDADES ASIGNADAS' : 'DATOS DE LA UNIDAD'}
             </div>
-            <div className="volante-fila">
-              <div className="volante-label">AUXILIAR</div>
-              <div className="volante-valor">
-                {auxiliar?.nombre_completo ?? ''}
+            <table className="volante-tabla">
+              <thead>
+                <tr>
+                  {esMultiple && <th>#</th>}
+                  <th>UNIDAD</th>
+                  <th>OPERADOR</th>
+                  <th>AUXILIARES</th>
+                  <th>DESTINO</th>
+                  <th>COSTO</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filas.map((f, i) => (
+                  <tr key={f.id}>
+                    {esMultiple && <td>{i + 1}</td>}
+                    <td>{f.unidadTexto}</td>
+                    <td>{f.operadorTexto}</td>
+                    <td>{f.auxiliaresTexto || '—'}</td>
+                    <td>{f.destino}</td>
+                    <td>{f.costo || '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Trazabilidad por unidad */}
+            {filas.some((f) => f.paradas.length > 0) && (
+              <>
+                <div className="volante-tabla-titulo">
+                  TRAZABILIDAD DE PARADAS
+                </div>
+                {filas.map((f, i) =>
+                  f.paradas.length === 0 ? null : (
+                    <div key={f.id} className="volante-trace-unidad">
+                      <div className="volante-trace-titulo">
+                        Unidad {i + 1}: {f.unidadTexto || 'Sin asignar'}
+                      </div>
+                      <table className="volante-tabla">
+                        <thead>
+                          <tr>
+                            <th>TIPO</th>
+                            <th>DIRECCIÓN</th>
+                            <th>HORA</th>
+                            <th>NOTAS</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {f.paradas.map((p) => (
+                            <tr key={p.id}>
+                              <td>
+                                {p.tipo === 'carga' ? 'CARGA' : 'DESCARGA'}
+                              </td>
+                              <td>{p.direccion}</td>
+                              <td>{p.hora}</td>
+                              <td>{p.notas || '—'}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )
+                )}
+              </>
+            )}
+
+            <div className="volante-seccion">
+              <div className="volante-seccion-titulo">
+                DESCRIPCIÓN DE SERVICIOS
+              </div>
+              <div className="volante-seccion-contenido">
+                {descripcionServicios}
               </div>
             </div>
 
-            <div className="volante-fila">
-              <div className="volante-label">REGISTRO A</div>
-              <div className="volante-valor">{registroA}</div>
-            </div>
-            <div className="volante-fila">
-              <div className="volante-label">COSTO</div>
-              <div className="volante-valor">{costo}</div>
-            </div>
-          </div>
-
-          {/* Descripción de servicios */}
-          <div className="volante-seccion">
-            <div className="volante-seccion-titulo">DESCRIPCIÓN DE SERVICIOS</div>
-            <div className="volante-seccion-contenido">
-              {descripcionServicios}
-            </div>
-          </div>
-
-          {/* Descripción de carga */}
-          <div className="volante-seccion">
-            <div className="volante-seccion-titulo">DESCRIPCIÓN DE CARGA</div>
-            <div className="volante-seccion-contenido">
-              {descripcionCarga}
+            <div className="volante-seccion">
+              <div className="volante-seccion-titulo">DESCRIPCIÓN DE CARGA</div>
+              <div className="volante-seccion-contenido">
+                {descripcionCarga}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
