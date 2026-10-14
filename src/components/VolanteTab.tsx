@@ -357,7 +357,7 @@ export function VolanteTab() {
     }
   };
 
-  const imprimir = () => window.print();
+
 
   // === Compartir como imagen ===
   const generarBlobImagen = async (): Promise<Blob | null> => {

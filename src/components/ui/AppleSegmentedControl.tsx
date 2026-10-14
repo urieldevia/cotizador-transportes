@@ -46,5 +46,3 @@ function AppleSegmentedControlInner<T extends string>({
 export const AppleSegmentedControl = memo(
   AppleSegmentedControlInner
 ) as typeof AppleSegmentedControlInner;
-
-AppleSegmentedControl.displayName = 'AppleSegmentedControl';

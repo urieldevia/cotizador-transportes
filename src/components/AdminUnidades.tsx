@@ -8,7 +8,6 @@ import {
   AppleButton,
   AppleInput,
   AppleCard,
-  AppleBadge,
 } from './ui';
 import type { UnidadFisica, Propietario } from '../lib/types';
 
@@ -31,8 +30,7 @@ const UnidadRow = memo(
             {unidad.placas && (
               <span
                 style={{
-                  fontFamily:
-                    "'SF Mono', ui-monospace, Menlo, monospace",
+                  fontFamily: "'SF Mono', ui-monospace, Menlo, monospace",
                   marginRight: 8,
                 }}
               >
@@ -183,9 +181,7 @@ export function AdminUnidades() {
 
       <div className="lista-cards">
         {unidades.length === 0 && (
-          <div className="info-box">
-            No hay unidades registradas aún
-          </div>
+          <div className="info-box">No hay unidades registradas aún</div>
         )}
         {unidades.map((u) => {
           const prop = propietarios.find(
