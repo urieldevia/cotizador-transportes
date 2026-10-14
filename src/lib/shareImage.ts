@@ -4,32 +4,71 @@ const FILE_NAME_PREFIX = 'volante';
 
 /**
  * Captura un elemento DOM y devuelve un Blob PNG.
- * Optimizado para impresión tipo documento (2x pixel ratio).
+ * Configuración robusta: ignora fuentes externas, imágenes rotas y CSS problemáticos.
  */
 export async function capturarComoImagen(
   element: HTMLElement
 ): Promise<Blob> {
-  const blob = await toBlob(element, {
-    cacheBust: true,
-    pixelRatio: 2,
-    backgroundColor: '#ffffff',
-    width: element.offsetWidth,
-    height: element.offsetHeight,
-    style: {
-      transform: 'none',
-      boxShadow: 'none',
-      borderRadius: '0',
-      border: 'none',
-    },
-  });
+  // Asegurar visibilidad
+  const originalStyles = {
+    display: element.style.display,
+    visibility: element.style.visibility,
+    opacity: element.style.opacity,
+  };
+  element.style.display = 'block';
+  element.style.visibility = 'visible';
+  element.style.opacity = '1';
 
-  if (!blob) throw new Error('No se pudo generar la imagen');
-  return blob;
+  try {
+    // Intento 1: configuración completa
+    try {
+      const blob = await toBlob(element, {
+        cacheBust: true,
+        pixelRatio: 2,
+        backgroundColor: '#ffffff',
+        skipFonts: true,
+        skipAutoScale: true,
+        width: element.scrollWidth,
+        height: element.scrollHeight,
+        style: {
+          transform: 'none',
+          boxShadow: 'none',
+          borderRadius: '0',
+          border: 'none',
+          margin: '0',
+        },
+        filter: (node) => {
+          // Excluir imágenes que puedan fallar (logo.png si no existe)
+          if (node instanceof HTMLImageElement) {
+            return node.complete && node.naturalWidth > 0;
+          }
+          return true;
+        },
+      });
+
+      if (blob) return blob;
+    } catch (err1) {
+      console.warn('Intento 1 falló, probando configuración mínima:', err1);
+    }
+
+    // Intento 2: configuración mínima
+    const blob = await toBlob(element, {
+      cacheBust: true,
+      pixelRatio: 2,
+      backgroundColor: '#ffffff',
+      skipFonts: true,
+    });
+
+    if (!blob) throw new Error('No se pudo generar la imagen');
+    return blob;
+  } finally {
+    // Restaurar estilos originales
+    element.style.display = originalStyles.display;
+    element.style.visibility = originalStyles.visibility;
+    element.style.opacity = originalStyles.opacity;
+  }
 }
 
-/**
- * Descarga la imagen como archivo PNG.
- */
 export function descargarImagen(blob: Blob, folio: string): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -41,25 +80,16 @@ export function descargarImagen(blob: Blob, folio: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-/**
- * Copia la imagen al portapapeles (solo HTTPS / localhost).
- * Funciona en Chrome, Edge, Safari moderno.
- */
 export async function copiarImagenAlPortapapeles(blob: Blob): Promise<void> {
   if (!navigator.clipboard || !window.ClipboardItem) {
     throw new Error(
       'Tu navegador no soporta copiar imágenes. Usa "Descargar PNG".'
     );
   }
-
   const item = new ClipboardItem({ 'image/png': blob });
   await navigator.clipboard.write([item]);
 }
 
-/**
- * Comparte la imagen usando Web Share API (móvil nativo).
- * Si no está disponible, lanza error para hacer fallback.
- */
 export async function compartirImagen(
   blob: Blob,
   folio: string,
@@ -86,9 +116,6 @@ export async function compartirImagen(
   }
 }
 
-/**
- * Abre WhatsApp Web con texto (para cuando no hay Web Share API).
- */
 export function abrirWhatsAppConTexto(texto: string): void {
   window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
 }

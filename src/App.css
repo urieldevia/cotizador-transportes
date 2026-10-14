@@ -2689,4 +2689,145 @@ table.volante-tabla tbody tr:last-child td {
     font-size: 15px;
   }
 }
+/* ============================================
+   BOTONES DEL VOLANTE (Apple / Samsung style)
+   ============================================ */
+.volante-botones-fila {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr 1.4fr !important;
+  gap: 10px !important;
+  margin: 20px 0 12px 0 !important;
+  width: 100% !important;
+}
+
+.volante-botones-share {
+  margin-top: 0 !important;
+  margin-bottom: 24px !important;
+}
+
+button.btn-apple {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 14px 18px !important;
+  border: none !important;
+  outline: none !important;
+  border-radius: 14px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI',
+    Roboto, sans-serif !important;
+  letter-spacing: -0.01em !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
+  min-height: 52px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  line-height: 1.1 !important;
+}
+
+button.btn-apple:disabled {
+  opacity: 0.55 !important;
+  cursor: wait !important;
+}
+
+button.btn-apple:not(:disabled):hover {
+  transform: translateY(-1px) !important;
+  filter: brightness(1.05) !important;
+}
+
+button.btn-apple:not(:disabled):active {
+  transform: translateY(0) scale(0.97) !important;
+}
+
+/* Variante Primary - Azul Apple */
+button.btn-apple-primary {
+  background: #007aff !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3) !important;
+}
+
+button.btn-apple-primary:hover:not(:disabled) {
+  background: #0062cc !important;
+}
+
+/* Variante Secondary - Azul suave */
+button.btn-apple-secondary {
+  background: rgba(0, 122, 255, 0.12) !important;
+  color: #007aff !important;
+}
+
+button.btn-apple-secondary:hover:not(:disabled) {
+  background: rgba(0, 122, 255, 0.2) !important;
+}
+
+/* Variante Danger - Rojo suave */
+button.btn-apple-danger {
+  background: rgba(255, 59, 48, 0.1) !important;
+  color: #ff3b30 !important;
+}
+
+button.btn-apple-danger:hover:not(:disabled) {
+  background: rgba(255, 59, 48, 0.2) !important;
+}
+
+/* Variante Blue (Copiar imagen) */
+button.btn-apple-blue {
+  background: rgba(0, 122, 255, 0.12) !important;
+  color: #007aff !important;
+}
+
+button.btn-apple-blue:hover:not(:disabled) {
+  background: rgba(0, 122, 255, 0.22) !important;
+}
+
+/* Variante WhatsApp - Verde */
+button.btn-apple-whatsapp {
+  background: rgba(52, 199, 89, 0.14) !important;
+  color: #21a366 !important;
+}
+
+button.btn-apple-whatsapp:hover:not(:disabled) {
+  background: rgba(52, 199, 89, 0.24) !important;
+}
+
+/* Variante Gray (Descargar) */
+button.btn-apple-gray {
+  background: #f2f2f7 !important;
+  color: #1c1c1e !important;
+}
+
+button.btn-apple-gray:hover:not(:disabled) {
+  background: #e8e8ed !important;
+}
+
+/* Estado success (verde) */
+button.btn-apple.success {
+  background: rgba(52, 199, 89, 0.14) !important;
+  color: #21a366 !important;
+  font-weight: 700 !important;
+}
+
+@media (max-width: 640px) {
+  .volante-botones-fila {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .volante-botones-fila .btn-apple-primary {
+    grid-column: 1 / -1 !important;
+  }
+
+  .volante-botones-share {
+    grid-template-columns: 1fr !important;
+  }
+
+  button.btn-apple {
+    min-height: 48px !important;
+    font-size: 14px !important;
+  }
+}
 }
