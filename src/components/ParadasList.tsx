@@ -52,65 +52,65 @@ export function ParadasList({ paradas, onChange }: Props) {
 
       {paradas.length === 0 && (
         <div className="paradas-vacio">
-          Sin paradas registradas
+          Sin paradas registradas. Añade una carga o descarga.
         </div>
       )}
 
-      <div className="paradas-lista">
-        {paradas.map((p, idx) => (
-          <div key={p.id} className={`parada-item ${p.tipo}`}>
-            <div className="parada-header">
-              <span className={`parada-badge ${p.tipo}`}>
-                {p.tipo === 'carga' ? '📦 CARGA' : '🏁 DESCARGA'}
-              </span>
-              <span className="parada-num">#{idx + 1}</span>
-              <button
-                type="button"
-                className="btn-parada-remove"
-                onClick={() => eliminar(p.id)}
-              >
-                ✕
-              </button>
-            </div>
+      {paradas.length > 0 && (
+        <div className="paradas-lista">
+          {paradas.map((p, idx) => (
+            <div key={p.id} className={`parada-item ${p.tipo}`}>
+              <div className="parada-header">
+                <span className={`parada-badge ${p.tipo}`}>
+                  {p.tipo === 'carga' ? '📦 CARGA' : '🏁 DESCARGA'} #{idx + 1}
+                </span>
+                <button
+                  type="button"
+                  className="btn-parada-remove"
+                  onClick={() => eliminar(p.id)}
+                  aria-label="Eliminar parada"
+                >
+                  ✕
+                </button>
+              </div>
 
-            <div className="parada-campos">
+              <div className="parada-campos">
+                <div className="parada-campo">
+                  <label>Dirección / Punto</label>
+                  <input
+                    type="text"
+                    value={p.direccion}
+                    onChange={(e) =>
+                      actualizar(p.id, {
+                        direccion: e.target.value.toUpperCase(),
+                      })
+                    }
+                    placeholder="BODEGA CENTRAL"
+                  />
+                </div>
+                <div className="parada-campo">
+                  <label>Hora</label>
+                  <input
+                    type="time"
+                    value={p.hora}
+                    onChange={(e) => actualizar(p.id, { hora: e.target.value })}
+                  />
+                </div>
+              </div>
+
               <div className="parada-campo">
-                <label>Dirección / Punto</label>
+                <label>Notas (opcional)</label>
                 <input
                   type="text"
-                  value={p.direccion}
-                  onChange={(e) =>
-                    actualizar(p.id, {
-                      direccion: e.target.value.toUpperCase(),
-                    })
-                  }
-                  placeholder="BODEGA CENTRAL"
-                />
-              </div>
-              <div className="parada-campo hora">
-                <label>Hora</label>
-                <input
-                  type="time"
-                  value={p.hora}
-                  onChange={(e) => actualizar(p.id, { hora: e.target.value })}
+                  value={p.notas}
+                  onChange={(e) => actualizar(p.id, { notas: e.target.value })}
+                  placeholder="Firmó Juan Pérez"
                 />
               </div>
             </div>
-
-            <div className="parada-campo">
-              <label>Notas (opcional)</label>
-              <input
-                type="text"
-                value={p.notas}
-                onChange={(e) =>
-                  actualizar(p.id, { notas: e.target.value })
-                }
-                placeholder="Firmó Juan Pérez"
-              />
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

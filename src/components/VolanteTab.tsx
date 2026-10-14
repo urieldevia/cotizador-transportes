@@ -77,7 +77,6 @@ export function VolanteTab() {
   const pickerFechaRef = useRef<HTMLInputElement>(null);
   const clienteWrapRef = useRef<HTMLDivElement>(null);
 
-  // Cargar folio inicial y refrescarlo al borrar volantes
   useEffect(() => {
     if (vista === 'nuevo' && !volanteId) {
       obtenerSiguienteFolio().then(setFolio);
@@ -231,7 +230,6 @@ export function VolanteTab() {
     actualizarAsignacion(id, { destino: anterior.destino });
   };
 
-  // Fecha: clic en el icono o en el campo abre el calendario si está vacío
   const abrirPicker = () => {
     pickerFechaRef.current?.showPicker?.();
     pickerFechaRef.current?.click();
@@ -357,7 +355,9 @@ export function VolanteTab() {
     return {
       ...a,
       unidadTexto: unidad
-        ? `${unidad.marca_modelo}${unidad.color ? ` ${unidad.color}` : ''}${unidad.placas ? ` - ${unidad.placas}` : ''}`
+        ? `${unidad.marca_modelo}${unidad.color ? ` ${unidad.color}` : ''}${
+            unidad.placas ? ` - ${unidad.placas}` : ''
+          }`
         : '',
       operadorTexto: operador?.nombre_completo ?? '',
       auxiliaresTexto: auxiliares.map((x) => x.nombre_completo).join(', '),
@@ -396,10 +396,7 @@ export function VolanteTab() {
       <div className="no-print">
         <h1>Volante de Registro</h1>
 
-        <div
-          className="subtabs-samsung"
-          style={{ gridTemplateColumns: '1fr 1fr' }}
-        >
+        <div className="subtabs-samsung" style={{ gridTemplateColumns: '1fr 1fr' }}>
           <button
             type="button"
             className={`subtab-item ${vista === 'nuevo' ? 'active' : ''}`}
@@ -436,7 +433,7 @@ export function VolanteTab() {
                   type="button"
                   className="btn-quitar-unidad"
                   onClick={() => handleEliminarGuardado(v.id)}
-                  title="Eliminar volante"
+                  aria-label="Eliminar volante"
                 >
                   ✕
                 </button>
@@ -488,14 +485,7 @@ export function VolanteTab() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       >
-                        <rect
-                          x="3"
-                          y="4"
-                          width="18"
-                          height="18"
-                          rx="2"
-                          ry="2"
-                        />
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                         <line x1="16" y1="2" x2="16" y2="6" />
                         <line x1="8" y1="2" x2="8" y2="6" />
                         <line x1="3" y1="10" x2="21" y2="10" />
@@ -601,7 +591,7 @@ export function VolanteTab() {
                     type="text"
                     value={filtroUnidades}
                     onChange={(e) => setFiltroUnidades(e.target.value)}
-                    placeholder="🔍 Buscar unidad, placas o propietario..."
+                    placeholder="Buscar unidad, placas o propietario..."
                   />
                 </div>
               )}
@@ -633,7 +623,9 @@ export function VolanteTab() {
                   );
                 })}
                 {unidadesFiltradas.length === 0 && (
-                  <div className="hint">Sin resultados para esa búsqueda</div>
+                  <div className="hint" style={{ padding: 16 }}>
+                    Sin resultados para esa búsqueda
+                  </div>
                 )}
               </div>
 
@@ -658,7 +650,6 @@ export function VolanteTab() {
                         Unidad {index + 1}
                       </span>
                       <span className="asignacion-unidad-texto">
-                        {' '}
                         {unidadObj?.marca_modelo}
                         {unidadObj?.color ? ` ${unidadObj.color}` : ''}
                         {unidadObj?.placas ? ` · ${unidadObj.placas}` : ''}
@@ -737,7 +728,7 @@ export function VolanteTab() {
                           type="text"
                           value={filtroAuxiliares}
                           onChange={(e) => setFiltroAuxiliares(e.target.value)}
-                          placeholder="🔍 Buscar auxiliar..."
+                          placeholder="Buscar auxiliar..."
                         />
                       </div>
                     )}
@@ -748,7 +739,9 @@ export function VolanteTab() {
                           <button
                             key={p.id}
                             type="button"
-                            className={`auxiliar-chip ${activo ? 'active' : ''}`}
+                            className={`auxiliar-chip ${
+                              activo ? 'active' : ''
+                            }`}
                             onClick={() => toggleAuxiliar(a.id, p.id)}
                           >
                             {p.nombre_completo}
@@ -851,7 +844,7 @@ export function VolanteTab() {
                     setDescripcionServicios(e.target.value.toUpperCase())
                   }
                   placeholder="RECOLECCION EN SIMA EL DIA 11 Y ENTREGA EL DIA 12 EN GUADALAJARA"
-                  rows={2}
+                  rows={3}
                   className="notas-textarea"
                 />
               </div>
@@ -864,7 +857,7 @@ export function VolanteTab() {
                     setDescripcionCarga(e.target.value.toUpperCase())
                   }
                   placeholder="EQUIPO MEDICO"
-                  rows={2}
+                  rows={3}
                   className="notas-textarea"
                 />
               </div>
@@ -910,11 +903,23 @@ export function VolanteTab() {
           <div className="volante-doc">
             <div className="volante-header">
               <div className="volante-logo">
-                <img src="/logo.png" alt="Logo" />
-              </div>
-              <div className="volante-titulo">
-                <div className="volante-empresa">TRANSPORTES RAMIREZ</div>
-                <div className="volante-subtitulo">REMISION DE SERVICIO</div>
+                <img
+                  src="/logo.png"
+                  alt="TR"
+                  onError={(e) => {
+                    const img = e.target as HTMLImageElement;
+                    img.style.display = 'none';
+                    const parent = img.parentElement;
+                    if (parent && !parent.querySelector('.logo-fallback')) {
+                      const fallback = document.createElement('div');
+                      fallback.className = 'logo-fallback';
+                      fallback.textContent = 'TR';
+                      fallback.style.cssText =
+                        'width:60px;height:60px;background:#007AFF;color:white;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;letter-spacing:-0.02em;';
+                      parent.appendChild(fallback);
+                    }
+                  }}
+                />
               </div>
               <div className="volante-folio-fecha">
                 <div className="volante-folio">{folio || 'VOLANT-000'}</div>
@@ -927,21 +932,32 @@ export function VolanteTab() {
               </div>
             </div>
 
+            <div
+              style={{
+                marginBottom: 24,
+                paddingBottom: 20,
+                borderBottom: '1px solid #e5e5ea',
+              }}
+            >
+              <div className="volante-empresa">TRANSPORTES RAMÍREZ</div>
+              <div className="volante-subtitulo">REMISIÓN DE SERVICIO</div>
+            </div>
+
             <div className="volante-grid">
               <div className="volante-fila">
-                <div className="volante-label">ORIGEN</div>
-                <div className="volante-valor">{origen}</div>
-              </div>
-              <div className="volante-fila">
                 <div className="volante-label">CLIENTE</div>
-                <div className="volante-valor">{cliente}</div>
+                <div className="volante-valor">{cliente || '—'}</div>
               </div>
               <div className="volante-fila">
-                <div className="volante-label">REGISTRO A</div>
-                <div className="volante-valor">{registroA}</div>
+                <div className="volante-label">ORIGEN</div>
+                <div className="volante-valor">{origen || '—'}</div>
               </div>
               <div className="volante-fila">
-                <div className="volante-label">UNIDADES</div>
+                <div className="volante-label">REGISTRÓ</div>
+                <div className="volante-valor">{registroA || '—'}</div>
+              </div>
+              <div className="volante-fila">
+                <div className="volante-label">UNIDADES TOTALES</div>
                 <div className="volante-valor">{filas.length}</div>
               </div>
             </div>
@@ -952,22 +968,22 @@ export function VolanteTab() {
             <table className="volante-tabla">
               <thead>
                 <tr>
-                  {esMultiple && <th>#</th>}
-                  <th>UNIDAD</th>
-                  <th>OPERADOR</th>
-                  <th>AUXILIARES</th>
-                  <th>DESTINO</th>
-                  <th>COSTO</th>
+                  {esMultiple && <th style={{ width: '5%' }}>#</th>}
+                  <th style={{ width: esMultiple ? '25%' : '28%' }}>UNIDAD</th>
+                  <th style={{ width: '20%' }}>OPERADOR</th>
+                  <th style={{ width: '25%' }}>AUXILIARES</th>
+                  <th style={{ width: '17%' }}>DESTINO</th>
+                  <th style={{ width: '13%', textAlign: 'right' }}>COSTO</th>
                 </tr>
               </thead>
               <tbody>
                 {filas.map((f, i) => (
                   <tr key={f.id}>
                     {esMultiple && <td>{i + 1}</td>}
-                    <td>{f.unidadTexto}</td>
-                    <td>{f.operadorTexto}</td>
+                    <td>{f.unidadTexto || '—'}</td>
+                    <td>{f.operadorTexto || '—'}</td>
                     <td>{f.auxiliaresTexto || '—'}</td>
-                    <td>{f.destino}</td>
+                    <td>{f.destino || '—'}</td>
                     <td>{f.costo || '—'}</td>
                   </tr>
                 ))}
@@ -988,20 +1004,20 @@ export function VolanteTab() {
                       <table className="volante-tabla">
                         <thead>
                           <tr>
-                            <th>TIPO</th>
-                            <th>DIRECCIÓN</th>
-                            <th>HORA</th>
-                            <th>NOTAS</th>
+                            <th style={{ width: '15%' }}>TIPO</th>
+                            <th style={{ width: '40%' }}>DIRECCIÓN / PUNTO</th>
+                            <th style={{ width: '15%' }}>HORA</th>
+                            <th style={{ width: '30%' }}>NOTAS</th>
                           </tr>
                         </thead>
                         <tbody>
                           {f.paradas.map((p) => (
                             <tr key={p.id}>
                               <td>
-                                {p.tipo === 'carga' ? 'CARGA' : 'DESCARGA'}
+                                {p.tipo === 'carga' ? '📦 CARGA' : '🏁 DESCARGA'}
                               </td>
-                              <td>{p.direccion}</td>
-                              <td>{p.hora}</td>
+                              <td>{p.direccion || '—'}</td>
+                              <td>{p.hora || '—'}</td>
                               <td>{p.notas || '—'}</td>
                             </tr>
                           ))}
@@ -1018,14 +1034,14 @@ export function VolanteTab() {
                 DESCRIPCIÓN DE SERVICIOS
               </div>
               <div className="volante-seccion-contenido">
-                {descripcionServicios}
+                {descripcionServicios || '—'}
               </div>
             </div>
 
             <div className="volante-seccion">
               <div className="volante-seccion-titulo">DESCRIPCIÓN DE CARGA</div>
               <div className="volante-seccion-contenido">
-                {descripcionCarga}
+                {descripcionCarga || '—'}
               </div>
             </div>
           </div>
