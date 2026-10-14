@@ -10,6 +10,13 @@ import {
 import { ParadasList } from './ParadasList';
 import type { AsignacionUnidad, Volante } from '../lib/types';
 import { normalizarTexto } from '../hooks/useUbicaciones';
+import {
+  capturarComoImagen,
+  descargarImagen,
+  copiarImagenAlPortapapeles,
+  compartirImagen,
+  abrirWhatsAppConTexto,
+} from '../lib/shareImage';
 
 const MESES = [
   'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
@@ -74,8 +81,14 @@ export function VolanteTab() {
   const [guardando, setGuardando] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
+  // Estados para compartir imagen
+  const [generandoImagen, setGenerandoImagen] = useState(false);
+  const [imgCopiada, setImgCopiada] = useState(false);
+  const [imgDescargada, setImgDescargada] = useState(false);
+
   const pickerFechaRef = useRef<HTMLInputElement>(null);
   const clienteWrapRef = useRef<HTMLDivElement>(null);
+  const volanteDocRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (vista === 'nuevo' && !volanteId) {
@@ -339,12 +352,69 @@ export function VolanteTab() {
         const f = await obtenerSiguienteFolio();
         setFolio(f);
       }
-    } catch (e) {
+    } catch {
       alert('Error al eliminar');
     }
   };
 
   const imprimir = () => window.print();
+
+  // === Compartir como imagen ===
+  const generarBlobImagen = async (): Promise<Blob | null> => {
+    if (!volanteDocRef.current) return null;
+    setGenerandoImagen(true);
+    try {
+      const blob = await capturarComoImagen(volanteDocRef.current);
+      return blob;
+    } catch (e) {
+      alert(
+        e instanceof Error
+          ? e.message
+          : 'Error al generar la imagen del volante'
+      );
+      return null;
+    } finally {
+      setGenerandoImagen(false);
+    }
+  };
+
+  const handleCopiarImagen = async () => {
+    const blob = await generarBlobImagen();
+    if (!blob) return;
+    try {
+      await copiarImagenAlPortapapeles(blob);
+      setImgCopiada(true);
+      setTimeout(() => setImgCopiada(false), 2000);
+    } catch (e) {
+      alert(
+        e instanceof Error ? e.message : 'No se pudo copiar la imagen'
+      );
+    }
+  };
+
+  const handleDescargarImagen = async () => {
+    const blob = await generarBlobImagen();
+    if (!blob) return;
+    descargarImagen(blob, folio);
+    setImgDescargada(true);
+    setTimeout(() => setImgDescargada(false), 2000);
+  };
+
+  const handleCompartirWhatsApp = async () => {
+    const blob = await generarBlobImagen();
+    if (!blob) return;
+
+    const texto = `${folio} · ${cliente || 'Sin cliente'} · ${
+      filas.length
+    } unidad(es)`;
+
+    const compartido = await compartirImagen(blob, folio, texto);
+
+    if (!compartido) {
+      descargarImagen(blob, folio);
+      setTimeout(() => abrirWhatsAppConTexto(texto), 500);
+    }
+  };
 
   const filas = asignaciones.map((a) => {
     const unidad = unidades.find((u) => u.id === a.unidadFisicaId);
@@ -865,7 +935,7 @@ export function VolanteTab() {
 
             {msg && <div className="info-box">{msg}</div>}
 
-            <div className="volante-acciones">
+            <div className="volante-acciones volante-acciones-2">
               <button
                 type="button"
                 className="btn-danger-outline"
@@ -885,22 +955,59 @@ export function VolanteTab() {
                   ? 'Actualizar'
                   : 'Guardar'}
               </button>
+            </div>
+
+            <div className="volante-acciones-imagen">
               <button
                 type="button"
-                className="btn-primary"
-                onClick={imprimir}
+                className={`btn-share btn-share-copiar ${
+                  imgCopiada ? 'success' : ''
+                }`}
+                onClick={handleCopiarImagen}
+                disabled={generandoImagen}
+                title="Copiar volante como imagen"
               >
-                🖨️ Imprimir / PDF
+                {generandoImagen
+                  ? '⏳ Generando...'
+                  : imgCopiada
+                  ? '✓ Copiada'
+                  : '📋 Copiar imagen'}
+              </button>
+
+              <button
+                type="button"
+                className="btn-share btn-share-whatsapp"
+                onClick={handleCompartirWhatsApp}
+                disabled={generandoImagen}
+                title="Compartir por WhatsApp"
+              >
+                {generandoImagen ? '⏳ Generando...' : '💬 WhatsApp'}
+              </button>
+
+              <button
+                type="button"
+                className={`btn-share btn-share-descargar ${
+                  imgDescargada ? 'success' : ''
+                }`}
+                onClick={handleDescargarImagen}
+                disabled={generandoImagen}
+                title="Descargar como PNG"
+              >
+                {generandoImagen
+                  ? '⏳'
+                  : imgDescargada
+                  ? '✓ PNG'
+                  : '📥 Descargar PNG'}
               </button>
             </div>
           </>
         )}
       </div>
 
-      {/* IMPRIMIBLE */}
+      {/* IMPRIMIBLE / CAPTURABLE */}
       {vista === 'nuevo' && (
         <div className="volante-print-area">
-          <div className="volante-doc">
+          <div className="volante-doc" ref={volanteDocRef}>
             <div className="volante-header">
               <div className="volante-logo">
                 <img

@@ -2594,4 +2594,99 @@ table.volante-tabla tbody tr:last-child td {
     font-size: 10pt !important;
   }
 }
+/* ============================================
+   BARRA DE COMPARTIR IMAGEN
+   ============================================ */
+.volante-acciones-2 {
+  margin-bottom: 12px;
+  grid-template-columns: auto auto 1fr;
+}
+
+.volante-acciones-imagen {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.btn-share {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 16px;
+  border: none;
+  border-radius: var(--radius-btn);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-height: 50px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-share:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.btn-share:not(:disabled):hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.btn-share:not(:disabled):active {
+  transform: translateY(0) scale(0.97);
+}
+
+.btn-share-copiar {
+  background: var(--apple-blue-tint);
+  color: var(--apple-blue);
+}
+
+.btn-share-copiar:not(:disabled):hover {
+  background: var(--apple-blue-tint-hover);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
+}
+
+.btn-share-whatsapp {
+  background: var(--apple-green-tint);
+  color: var(--apple-green);
+}
+
+.btn-share-whatsapp:not(:disabled):hover {
+  background: rgba(52, 199, 89, 0.22);
+  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.2);
+}
+
+.btn-share-descargar {
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+
+.btn-share-descargar:not(:disabled):hover {
+  background: var(--bg-input-alt);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.btn-share.success {
+  background: var(--apple-green-tint);
+  color: var(--apple-green);
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .volante-acciones-imagen {
+    grid-template-columns: 1fr;
+  }
+
+  .btn-share {
+    min-height: 48px;
+    font-size: 15px;
+  }
+}
 }
