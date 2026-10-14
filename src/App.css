@@ -2486,4 +2486,112 @@ table.volante-tabla tbody tr:last-child td {
   .volante-trace-unidad {
     page-break-inside: avoid;
   }
+  /* ============================================
+   UTILIDADES PARA COMPONENTES ATÓMICOS
+   ============================================ */
+.btn-primary.full-width,
+.btn-secondary.full-width,
+.btn-danger-outline.full-width {
+  width: 100%;
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.hint.error {
+  color: var(--apple-red);
+  font-weight: 500;
+}
+
+/* ============================================
+   PRINT MEJORADO (guía Apple)
+   ============================================ */
+@media print {
+  @page {
+    size: letter;
+    margin: 12mm;
+  }
+
+  /* Forzar impresión de colores de fondo */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  html,
+  body {
+    background: white !important;
+    font-size: 12pt !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+      system-ui, sans-serif !important;
+  }
+
+  /* Ocultar todo excepto el volante de impresión */
+  .no-print,
+  .tabs-samsung,
+  .tab-item,
+  .subtabs-samsung,
+  .subtab-item,
+  .volante-acciones,
+  .volante-tab > .no-print {
+    display: none !important;
+  }
+
+  /* El volante ocupa toda la hoja */
+  .volante-print-area {
+    display: block !important;
+    background: white !important;
+    padding: 0 !important;
+    position: static !important;
+  }
+
+  .volante-doc {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Evitar cortes feos */
+  table,
+  tr,
+  td,
+  th {
+    page-break-inside: avoid !important;
+  }
+
+  .volante-tabla,
+  table.volante-tabla,
+  .volante-seccion,
+  .volante-trace-unidad {
+    page-break-inside: avoid !important;
+  }
+
+  /* Ajuste de tipografía en impresión */
+  .volante-empresa {
+    font-size: 18pt !important;
+  }
+
+  .volante-folio {
+    font-size: 16pt !important;
+  }
+
+  table.volante-tabla thead th {
+    font-size: 9pt !important;
+  }
+
+  table.volante-tabla tbody td {
+    font-size: 10pt !important;
+  }
+}
 }

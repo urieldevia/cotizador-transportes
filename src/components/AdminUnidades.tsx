@@ -1,9 +1,66 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import {
   useCatalogo,
   crearUnidadFisica,
   eliminarUnidadFisica,
 } from '../hooks/useCatalogo';
+import {
+  AppleButton,
+  AppleInput,
+  AppleCard,
+  AppleBadge,
+} from './ui';
+import type { UnidadFisica, Propietario } from '../lib/types';
+
+interface UnidadRowProps {
+  unidad: UnidadFisica;
+  propietario?: Propietario;
+  onEliminar: (id: number) => void;
+}
+
+const UnidadRow = memo(
+  ({ unidad, propietario, onEliminar }: UnidadRowProps) => {
+    return (
+      <div className="card-item">
+        <div className="card-info">
+          <div className="card-titulo">
+            {unidad.marca_modelo}
+            {unidad.color && ` · ${unidad.color}`}
+          </div>
+          <div className="card-subtitulo">
+            {unidad.placas && (
+              <span
+                style={{
+                  fontFamily:
+                    "'SF Mono', ui-monospace, Menlo, monospace",
+                  marginRight: 8,
+                }}
+              >
+                {unidad.placas}
+              </span>
+            )}
+            {propietario && (
+              <>
+                <span style={{ marginRight: 8 }}>·</span>
+                {propietario.nombre}
+              </>
+            )}
+          </div>
+        </div>
+        <button
+          type="button"
+          className="btn-quitar-unidad"
+          onClick={() => onEliminar(unidad.id)}
+          aria-label="Eliminar unidad"
+        >
+          ✕
+        </button>
+      </div>
+    );
+  }
+);
+
+UnidadRow.displayName = 'UnidadRow';
 
 export function AdminUnidades() {
   const { unidades, propietarios, refrescar } = useCatalogo();
@@ -51,7 +108,7 @@ export function AdminUnidades() {
     try {
       await eliminarUnidadFisica(id);
       await refrescar();
-    } catch (e) {
+    } catch {
       alert('Error al eliminar');
     }
   };
@@ -60,18 +117,16 @@ export function AdminUnidades() {
     <div className="admin-seccion">
       <div className="admin-header">
         <h2>Unidades ({unidades.length})</h2>
-        <button
-          type="button"
-          className="btn-add-punto"
-          style={{ width: 'auto', padding: '10px 20px' }}
+        <AppleButton
+          variant="secondary"
           onClick={() => setMostrarForm(!mostrarForm)}
         >
-          {mostrarForm ? 'Cancelar' : '+ Agregar unidad'}
-        </button>
+          {mostrarForm ? 'Cancelar' : '+ Agregar'}
+        </AppleButton>
       </div>
 
       {mostrarForm && (
-        <div className="form-card">
+        <AppleCard>
           <div className="form-group">
             <label>Propietario</label>
             <select
@@ -89,78 +144,60 @@ export function AdminUnidades() {
             </select>
           </div>
 
-          <div className="form-group">
-            <label>Marca y modelo *</label>
-            <input
-              type="text"
-              value={marca}
-              onChange={(e) => setMarca(e.target.value)}
-              placeholder="NISSAN NP300"
-            />
-          </div>
+          <AppleInput
+            label="Marca y modelo *"
+            value={marca}
+            onChange={(e) => setMarca(e.target.value)}
+            placeholder="NISSAN NP300"
+          />
 
           <div className="row-2">
-            <div className="form-group">
-              <label>Color</label>
-              <input
-                type="text"
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
-                placeholder="GRIS"
-              />
-            </div>
-            <div className="form-group">
-              <label>Placas</label>
-              <input
-                type="text"
-                value={placas}
-                onChange={(e) => setPlacas(e.target.value)}
-                placeholder="30D7AA"
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>Notas</label>
-            <input
-              type="text"
-              value={notas}
-              onChange={(e) => setNotas(e.target.value)}
-              placeholder="Opcional"
+            <AppleInput
+              label="Color"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+              placeholder="GRIS"
+            />
+            <AppleInput
+              label="Placas"
+              value={placas}
+              onChange={(e) => setPlacas(e.target.value)}
+              placeholder="30D7AA"
             />
           </div>
+
+          <AppleInput
+            label="Notas"
+            value={notas}
+            onChange={(e) => setNotas(e.target.value)}
+            placeholder="Opcional"
+          />
 
           {error && <div className="error-box">{error}</div>}
 
-          <button type="button" className="btn-primary" onClick={guardar}>
+          <AppleButton onClick={guardar} fullWidth>
             Guardar unidad
-          </button>
-        </div>
+          </AppleButton>
+        </AppleCard>
       )}
 
       <div className="lista-cards">
+        {unidades.length === 0 && (
+          <div className="info-box">
+            No hay unidades registradas aún
+          </div>
+        )}
         {unidades.map((u) => {
-          const prop = propietarios.find((p) => p.id === u.propietario_id);
+          const prop = propietarios.find(
+            (p) => p.id === u.propietario_id
+          );
           return (
-            <div key={u.id} className="card-item">
-              <div className="card-info">
-                <div className="card-titulo">
-                  {u.marca_modelo}
-                  {u.color ? ` · ${u.color}` : ''}
-                </div>
-                <div className="card-subtitulo">
-                  {u.placas && `Placas: ${u.placas}`}
-                  {prop && ` · ${prop.nombre}`}
-                </div>
-              </div>
-              <button
-                type="button"
-                className="btn-remove-punto"
-                onClick={() => eliminar(u.id)}
-              >
-                ✕
-              </button>
-            </div>
+            <UnidadRow
+              key={u.id}
+              unidad={u}
+              propietario={prop}
+              onEliminar={eliminar}
+            />
           );
         })}
       </div>
