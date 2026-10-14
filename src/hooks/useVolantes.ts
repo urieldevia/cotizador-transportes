@@ -30,28 +30,42 @@ export function useVolantes() {
   return { volantes, cargando, refrescar };
 }
 
+/**
+ * Calcula el siguiente folio rellenando huecos.
+ * Ej: si existen VOLANT-754 y VOLANT-756, devuelve VOLANT-755.
+ * Si no existe ninguno, empieza en 754.
+ */
 export async function obtenerSiguienteFolio(): Promise<string> {
   const { data } = await supabase
     .from('volantes')
     .select('folio')
     .like('folio', 'VOLANT-%')
-    .order('id', { ascending: false })
-    .limit(20);
+    .eq('activo', true);
 
-  let siguiente = 754;
-  if (data && data.length > 0) {
-    const numeros = data
-      .map((v) => {
-        const m = v.folio.match(/VOLANT-(\d+)/);
-        return m ? parseInt(m[1]) : 0;
-      })
-      .filter((n) => n > 0);
+  const numeros = (data ?? [])
+    .map((v) => {
+      const m = v.folio.match(/VOLANT-(\d+)/);
+      return m ? parseInt(m[1]) : 0;
+    })
+    .filter((n) => n > 0)
+    .sort((a, b) => a - b);
 
-    if (numeros.length > 0) {
-      siguiente = Math.max(...numeros) + 1;
+  if (numeros.length === 0) {
+    return 'VOLANT-754';
+  }
+
+  // Buscar el primer hueco desde 754
+  let esperado = 754;
+  for (const n of numeros) {
+    if (n < 754) continue;
+    if (n === esperado) {
+      esperado++;
+    } else if (n > esperado) {
+      // Hueco encontrado
+      return `VOLANT-${esperado}`;
     }
   }
-  return `VOLANT-${siguiente}`;
+  return `VOLANT-${esperado}`;
 }
 
 export async function guardarVolante(

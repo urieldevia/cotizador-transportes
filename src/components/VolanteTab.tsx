@@ -77,11 +77,12 @@ export function VolanteTab() {
   const pickerFechaRef = useRef<HTMLInputElement>(null);
   const clienteWrapRef = useRef<HTMLDivElement>(null);
 
+  // Cargar folio inicial y refrescarlo al borrar volantes
   useEffect(() => {
     if (vista === 'nuevo' && !volanteId) {
       obtenerSiguienteFolio().then(setFolio);
     }
-  }, [vista, volanteId]);
+  }, [vista, volanteId, volantes.length]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -150,7 +151,6 @@ export function VolanteTab() {
     return `${parseInt(d)} DE ${MESES[parseInt(m) - 1]} DE ${y}`;
   }, [fechaISO]);
 
-  // === Unidades ===
   const toggleUnidad = (unidadId: number) => {
     setUnidadesSeleccionadas((prev) => {
       const yaEsta = prev.includes(unidadId);
@@ -169,9 +169,7 @@ export function VolanteTab() {
   const quitarUnidadDesdeAsignacion = (asignacionId: string) => {
     const asig = asignaciones.find((a) => a.id === asignacionId);
     if (!asig) return;
-    if (
-      !confirm('¿Quitar esta unidad del volante? Se perderán sus datos.')
-    )
+    if (!confirm('¿Quitar esta unidad del volante? Se perderán sus datos.'))
       return;
     setAsignaciones((prev) => prev.filter((a) => a.id !== asignacionId));
     if (asig.unidadFisicaId) {
@@ -233,6 +231,7 @@ export function VolanteTab() {
     actualizarAsignacion(id, { destino: anterior.destino });
   };
 
+  // Fecha: clic en el icono o en el campo abre el calendario si está vacío
   const abrirPicker = () => {
     pickerFechaRef.current?.showPicker?.();
     pickerFechaRef.current?.click();
@@ -337,7 +336,11 @@ export function VolanteTab() {
     try {
       await eliminarVolante(id);
       await refrescar();
-      if (volanteId === id) handleLimpiarTodo();
+      if (volanteId === id) {
+        setVolanteId(null);
+        const f = await obtenerSiguienteFolio();
+        setFolio(f);
+      }
     } catch (e) {
       alert('Error al eliminar');
     }
@@ -431,8 +434,9 @@ export function VolanteTab() {
                 </div>
                 <button
                   type="button"
-                  className="btn-remove-punto"
+                  className="btn-quitar-unidad"
                   onClick={() => handleEliminarGuardado(v.id)}
+                  title="Eliminar volante"
                 >
                   ✕
                 </button>
@@ -459,20 +463,43 @@ export function VolanteTab() {
                 </div>
                 <div className="form-group">
                   <label>Fecha</label>
-                  <div className="fecha-mixta">
+                  <div className="fecha-unica">
                     <input
                       type="text"
                       value={fechaTexto}
                       onChange={(e) => setFechaTexto(e.target.value)}
                       onBlur={normalizarFechaTexto}
                       placeholder="DD/MM/AAAA"
+                      inputMode="numeric"
                     />
                     <button
                       type="button"
-                      className="btn-picker-fecha"
+                      className="fecha-cal-btn"
                       onClick={abrirPicker}
+                      aria-label="Abrir calendario"
                     >
-                      📅
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <rect
+                          x="3"
+                          y="4"
+                          width="18"
+                          height="18"
+                          rx="2"
+                          ry="2"
+                        />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                      </svg>
                     </button>
                     <input
                       ref={pickerFechaRef}
@@ -551,7 +578,10 @@ export function VolanteTab() {
             {/* Unidades */}
             <div className="form-card">
               <div className="asignacion-titulo-bloque">
-                <div className="form-section-titulo" style={{ margin: 0, border: 0, padding: 0 }}>
+                <div
+                  className="form-section-titulo"
+                  style={{ margin: 0, border: 0, padding: 0 }}
+                >
                   Unidades ({unidadesSeleccionadas.length} seleccionadas)
                 </div>
                 {unidadesSeleccionadas.length > 0 && (
@@ -718,9 +748,7 @@ export function VolanteTab() {
                           <button
                             key={p.id}
                             type="button"
-                            className={`auxiliar-chip ${
-                              activo ? 'active' : ''
-                            }`}
+                            className={`auxiliar-chip ${activo ? 'active' : ''}`}
                             onClick={() => toggleAuxiliar(a.id, p.id)}
                           >
                             {p.nombre_completo}

@@ -2727,4 +2727,473 @@ button.btn-accion.copiado:hover {
     justify-content: center;
   }
 }
+/* ============================================
+   FECHA ÚNICA (texto + botón calendario dentro)
+   ============================================ */
+.fecha-unica {
+  position: relative;
+  display: block;
+}
+
+.fecha-unica input[type="text"] {
+  width: 100%;
+  padding: 14px 52px 14px 18px !important;
+  border: none;
+  border-radius: var(--radius-input);
+  font-size: 15px;
+  font-family: inherit;
+  font-weight: 500;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fecha-unica input[type="text"]:focus {
+  outline: none;
+  background: white;
+  box-shadow: 0 0 0 2px var(--samsung-blue);
+}
+
+.fecha-unica input[type="text"]::placeholder {
+  color: var(--text-tertiary);
+}
+
+.fecha-cal-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  color: var(--samsung-blue);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fecha-cal-btn:hover {
+  background: var(--samsung-blue-light);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.fecha-cal-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.hidden-date-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  border: none;
+  left: 0;
+  bottom: 0;
+}
+
+/* ============================================
+   BOTÓN HEREDAR (Samsung UI 8.5)
+   ============================================ */
+.btn-heredar {
+  float: right;
+  padding: 5px 12px;
+  background: var(--samsung-blue-light);
+  color: var(--samsung-blue);
+  border: none;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: -0.005em;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-heredar:hover {
+  background: rgba(0, 114, 222, 0.2);
+  transform: translateY(-1px);
+}
+
+.btn-heredar:active {
+  transform: translateY(0) scale(0.96);
+}
+
+/* ============================================
+   BOTÓN DUPLICAR (Samsung UI 8.5)
+   ============================================ */
+.btn-duplicar {
+  padding: 9px 16px;
+  background: var(--samsung-blue-light);
+  color: var(--samsung-blue);
+  border: none;
+  border-radius: 100px;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-duplicar:hover {
+  background: rgba(0, 114, 222, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 114, 222, 0.15);
+}
+
+.btn-duplicar:active {
+  transform: translateY(0) scale(0.96);
+}
+
+/* ============================================
+   BOTÓN QUITAR UNIDAD (Samsung UI 8.5)
+   ============================================ */
+.btn-quitar-unidad {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: none;
+  border-radius: 100px;
+  font-size: 15px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+}
+
+.btn-quitar-unidad:hover {
+  background: rgba(230, 57, 70, 0.22);
+  transform: scale(1.05);
+}
+
+.btn-quitar-unidad:active {
+  transform: scale(0.94);
+}
+
+/* ============================================
+   BOTÓN BORRAR TODO (Samsung UI 8.5)
+   ============================================ */
+.btn-borrar-todo {
+  padding: 10px 18px;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: none;
+  border-radius: 100px;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: -0.005em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.btn-borrar-todo:hover {
+  background: rgba(230, 57, 70, 0.22);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(230, 57, 70, 0.15);
+}
+
+.btn-borrar-todo:active {
+  transform: translateY(0) scale(0.96);
+}
+
+/* ============================================
+   BOTÓN LIMPIAR INLINE (Samsung UI 8.5)
+   ============================================ */
+.btn-limpiar-inline {
+  padding: 5px 12px;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: none;
+  border-radius: 100px;
+  font-size: 10.5px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: -0.005em;
+  text-transform: none;
+  float: right;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-limpiar-inline:hover {
+  background: rgba(230, 57, 70, 0.22);
+  transform: scale(1.03);
+}
+
+.btn-limpiar-inline:active {
+  transform: scale(0.96);
+}
+
+/* ============================================
+   CHIPS DE AUXILIARES (Samsung UI 8.5)
+   ============================================ */
+.auxiliares-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.auxiliar-chip {
+  padding: 11px 18px;
+  background: white;
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+  border-radius: 100px;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: -0.005em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.auxiliar-chip:hover {
+  background: var(--samsung-blue-light);
+  border-color: var(--samsung-blue-light);
+  transform: translateY(-1px);
+}
+
+.auxiliar-chip:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.auxiliar-chip.active {
+  background: var(--samsung-blue);
+  border-color: var(--samsung-blue);
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 3px 10px rgba(0, 114, 222, 0.25);
+}
+
+.auxiliar-chip.active::before {
+  content: '✓ ';
+  font-weight: 800;
+}
+
+.auxiliar-chip.active:hover {
+  background: var(--samsung-blue-dark);
+  border-color: var(--samsung-blue-dark);
+  box-shadow: 0 4px 14px rgba(0, 114, 222, 0.35);
+}
+
+/* ============================================
+   CHIPS DE UNIDADES (Samsung UI 8.5)
+   ============================================ */
+.unidad-chip {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 14px 18px;
+  background: white;
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+  border-radius: 18px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+  position: relative;
+}
+
+.unidad-chip:hover {
+  background: var(--samsung-blue-light);
+  border-color: var(--samsung-blue-light);
+  transform: translateY(-1px);
+}
+
+.unidad-chip:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.unidad-chip.active {
+  background: linear-gradient(135deg, #e6f0fb 0%, #d4e7fb 100%);
+  border-color: var(--samsung-blue);
+  box-shadow: 0 2px 12px rgba(0, 114, 222, 0.15);
+}
+
+.unidad-chip.active::before {
+  content: '✓';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  width: 24px;
+  height: 24px;
+  background: var(--samsung-blue);
+  color: white;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgba(0, 114, 222, 0.3);
+}
+
+.unidad-chip-titulo {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.005em;
+}
+
+.unidad-chip-placas {
+  padding: 5px 12px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  border-radius: 100px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: all 0.2s;
+}
+
+.unidad-chip.active .unidad-chip-placas {
+  background: var(--samsung-blue);
+  color: white;
+}
+
+.unidad-chip-prop {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.unidad-chip.active .unidad-chip-prop {
+  color: var(--samsung-blue);
+}
+
+/* ============================================
+   BOTONES DEL VOLANTE (Samsung UI 8.5)
+   ============================================ */
+.volante-acciones {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.volante-acciones .btn-primary,
+.volante-acciones .btn-secondary,
+.volante-acciones .btn-danger-outline {
+  width: auto;
+  min-width: 160px;
+  padding: 16px 28px;
+  margin-top: 0;
+  border-radius: 100px;
+  font-size: 15px;
+  font-weight: 800;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  letter-spacing: -0.005em;
+}
+
+.volante-acciones .btn-secondary {
+  background: white;
+  color: var(--samsung-blue);
+  border: 1.5px solid rgba(0, 114, 222, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.volante-acciones .btn-secondary:hover:not(:disabled) {
+  background: var(--samsung-blue-light);
+  border-color: var(--samsung-blue-light);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 114, 222, 0.15);
+}
+
+.volante-acciones .btn-secondary:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+}
+
+.volante-acciones .btn-secondary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.volante-acciones .btn-danger-outline {
+  background: white;
+  color: var(--danger);
+  border: 1.5px solid rgba(230, 57, 70, 0.25);
+}
+
+.volante-acciones .btn-danger-outline:hover {
+  background: var(--danger-bg);
+  border-color: var(--danger);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(230, 57, 70, 0.2);
+}
+
+.volante-acciones .btn-danger-outline:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 640px) {
+  .volante-acciones {
+    flex-direction: column;
+  }
+
+  .volante-acciones .btn-primary,
+  .volante-acciones .btn-secondary,
+  .volante-acciones .btn-danger-outline {
+    width: 100%;
+  }
+
+  .unidad-chip {
+    grid-template-columns: 1fr auto;
+    gap: 6px;
+  }
+
+  .unidad-chip-prop {
+    grid-column: 1 / -1;
+    text-align: left;
+    margin-top: 2px;
+  }
+
+  .auxiliar-chip {
+    font-size: 12.5px;
+    padding: 10px 14px;
+  }
+}
 }
