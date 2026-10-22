@@ -30,12 +30,14 @@ export function CotizadorForm() {
   const [incluirPuntosCarga, setIncluirPuntosCarga] = useState(false);
   const [aplicaPorcentajeCarga, setAplicaPorcentajeCarga] = useState(false);
   const [aplicaPorcentajeEntrega, setAplicaPorcentajeEntrega] = useState(false);
+  
+  // NUEVO SWITCH PARA MANIOBRAS
+  const [aplicaManiobras, setAplicaManiobras] = useState(false);
+  const [maniobras, setManiobras] = useState<Maniobras>('incluidas');
+  const [montoManiobras, setMontoManiobras] = useState(0);
 
   const [puntosCarga, setPuntosCarga] = useState<PuntoCotizacion[]>([{ ubicacionId: null, porcentaje: 100 }]);
   const [puntosEntrega, setPuntosEntrega] = useState<PuntoCotizacion[]>([{ ubicacionId: null, porcentaje: 100 }]);
-
-  const [maniobras, setManiobras] = useState<Maniobras>('incluidas');
-  const [montoManiobras, setMontoManiobras] = useState(0);
   const [porcentajeCliente, setPorcentajeCliente] = useState(100);
 
   const [resultado, setResultado] = useState<CotizacionResult | null>(null);
@@ -58,7 +60,9 @@ export function CotizadorForm() {
         const res = await calcularCotizacion({
           modalidad, unidadId, destinoId: 0,
           incluirPuntosCarga, aplicaPorcentajeCarga, aplicaPorcentajeEntrega,
-          puntosCarga, puntosEntrega, maniobras, montoManiobras,
+          puntosCarga, puntosEntrega, 
+          maniobras: aplicaManiobras ? maniobras : 'incluidas', 
+          montoManiobras: aplicaManiobras ? montoManiobras : 0,
           diasEstadia: 0, costoPorDia: 0, porcentajeRegreso: 60, porcentajeCliente,
         });
         if (currentId === requestIdRef.current) { setResultado(res); setError(null); }
@@ -66,7 +70,7 @@ export function CotizadorForm() {
         if (currentId === requestIdRef.current) { setError(e.message); setResultado(null); }
       }
     })();
-  }, [modalidad, unidadId, incluirPuntosCarga, aplicaPorcentajeCarga, aplicaPorcentajeEntrega, puntosCarga, puntosEntrega, maniobras, montoManiobras, porcentajeCliente]);
+  }, [modalidad, unidadId, incluirPuntosCarga, aplicaPorcentajeCarga, aplicaPorcentajeEntrega, puntosCarga, puntosEntrega, aplicaManiobras, maniobras, montoManiobras, porcentajeCliente]);
 
   const updEntrega = (i: number, patch: Partial<PuntoCotizacion>) => { const n = [...puntosEntrega]; n[i] = { ...n[i], ...patch }; setPuntosEntrega(n); };
   const updCarga = (i: number, patch: Partial<PuntoCotizacion>) => { const n = [...puntosCarga]; n[i] = { ...n[i], ...patch }; setPuntosCarga(n); };
@@ -88,31 +92,35 @@ export function CotizadorForm() {
 
       <div className="apple-card">
         <label className="apple-label">UNIDAD</label>
-        <select value={unidadId ?? ''} onChange={(e) => setUnidadId(Number(e.target.value) || null)}>
+        <select className="apple-input" value={unidadId ?? ''} onChange={(e) => setUnidadId(Number(e.target.value) || null)}>
           <option value="">Seleccionar unidad...</option>
           {unidades.map((u) => <option key={u.id} value={u.id}>{u.nombre}</option>)}
         </select>
       </div>
 
+      {/* PUNTOS DE ENTREGA */}
       <div className="apple-card">
         <div className="flex-between mb-4">
           <label className="apple-label m-0">PUNTOS DE ENTREGA</label>
           <IOSToggle label="Aplicar %" checked={aplicaPorcentajeEntrega} onChange={setAplicaPorcentajeEntrega} />
         </div>
         {puntosEntrega.map((p, i) => (
-          <div key={i} className="punto-item mb-2">
-            <div className="punto-ubicacion">
+          <div key={i} className="flex gap-2 items-center mb-2">
+            <div style={{ flex: 1 }}>
               <SelectorUbicacion label="" value={p.ubicacionId} onChange={(id) => updEntrega(i, { ubicacionId: id })} placeholder="Destino..." />
             </div>
             {aplicaPorcentajeEntrega && (
-              <div className="punto-pct">
-                <input type="number" value={p.porcentaje || ''} onChange={(e) => updEntrega(i, { porcentaje: Number(e.target.value) })} placeholder="%" />
-              </div>
+              <input type="number" className="apple-input" style={{ width: '70px' }} value={p.porcentaje || ''} onChange={(e) => updEntrega(i, { porcentaje: Number(e.target.value) })} placeholder="%" />
+            )}
+            {puntosEntrega.length > 1 && (
+              <button type="button" className="btn-remove-punto" onClick={() => setPuntosEntrega(puntosEntrega.filter((_, idx) => idx !== i))}>✕</button>
             )}
           </div>
         ))}
+        <button type="button" className="btn-apple btn-apple-secondary w-full mt-2" onClick={() => setPuntosEntrega([...puntosEntrega, { ubicacionId: null, porcentaje: 100 }])}>+ Agregar entrega</button>
       </div>
 
+      {/* PUNTOS DE CARGA */}
       <div className="apple-card">
         <IOSToggle label="Incluir Puntos de Carga" checked={incluirPuntosCarga} onChange={setIncluirPuntosCarga} />
         {incluirPuntosCarga && (
@@ -122,36 +130,45 @@ export function CotizadorForm() {
               <IOSToggle label="Aplicar %" checked={aplicaPorcentajeCarga} onChange={setAplicaPorcentajeCarga} />
             </div>
             {puntosCarga.map((p, i) => (
-              <div key={i} className="punto-item mb-2">
-                <div className="punto-ubicacion">
+              <div key={i} className="flex gap-2 items-center mb-2">
+                <div style={{ flex: 1 }}>
                   <SelectorUbicacion label="" value={p.ubicacionId} onChange={(id) => updCarga(i, { ubicacionId: id })} placeholder="Origen..." />
                 </div>
                 {aplicaPorcentajeCarga && (
-                  <div className="punto-pct">
-                    <input type="number" value={p.porcentaje || ''} onChange={(e) => updCarga(i, { porcentaje: Number(e.target.value) })} placeholder="%" />
-                  </div>
+                  <input type="number" className="apple-input" style={{ width: '70px' }} value={p.porcentaje || ''} onChange={(e) => updCarga(i, { porcentaje: Number(e.target.value) })} placeholder="%" />
+                )}
+                {puntosCarga.length > 1 && (
+                  <button type="button" className="btn-remove-punto" onClick={() => setPuntosCarga(puntosCarga.filter((_, idx) => idx !== i))}>✕</button>
                 )}
               </div>
             ))}
+            <button type="button" className="btn-apple btn-apple-secondary w-full mt-2" onClick={() => setPuntosCarga([...puntosCarga, { ubicacionId: null, porcentaje: 100 }])}>+ Agregar carga</button>
           </div>
         )}
       </div>
 
+      {/* MANIOBRAS (OCULTO POR DEFECTO) */}
       <div className="apple-card">
-        <label className="apple-label">MANIOBRAS</label>
-        <div className="radio-vertical mb-4">
-          <label className="radio-line"><input type="radio" value="incluidas" checked={maniobras === 'incluidas'} onChange={() => setManiobras('incluidas')} /> Incluidas</label>
-          <label className="radio-line"><input type="radio" value="mas" checked={maniobras === 'mas'} onChange={() => setManiobras('mas')} /> Más maniobras</label>
-        </div>
-        {maniobras === 'mas' && <input type="number" className="apple-input mb-4" value={montoManiobras || ''} onChange={(e) => setMontoManiobras(Number(e.target.value))} placeholder="Monto extra $" />}
+        <IOSToggle label="Incluir Maniobras" checked={aplicaManiobras} onChange={setAplicaManiobras} />
+        {aplicaManiobras && (
+          <div className="mt-4 pt-4 border-t">
+            <div className="radio-vertical mb-4">
+              <label className="radio-line"><input type="radio" value="incluidas" checked={maniobras === 'incluidas'} onChange={() => setManiobras('incluidas')} /> Incluidas sin costo extra</label>
+              <label className="radio-line"><input type="radio" value="mas" checked={maniobras === 'mas'} onChange={() => setManiobras('mas')} /> Cobrar maniobras adicionales</label>
+            </div>
+            {maniobras === 'mas' && (
+              <input type="number" className="apple-input" value={montoManiobras || ''} onChange={(e) => setMontoManiobras(Number(e.target.value))} placeholder="Monto extra $" />
+            )}
+          </div>
+        )}
         
-        <div className="border-t">
+        <div className="mt-4 pt-4 border-t">
           <label className="apple-label">% APLICABLE AL CLIENTE</label>
           <input type="number" className="apple-input" value={porcentajeCliente} onChange={(e) => setPorcentajeCliente(Number(e.target.value))} />
         </div>
       </div>
 
-      {error && <div className="error-box" style={{ background: '#ff3b30', color: 'white', padding: '12px', borderRadius: '12px', marginBottom: '16px' }}>{error}</div>}
+      {error && <div className="error-box" style={{ background: '#ff3b30', color: 'white', padding: '12px', borderRadius: '12px', marginBottom: '16px', textAlign: 'center', fontWeight: 'bold' }}>{error}</div>}
       {resultado && <DesgloseCotizacion resultado={resultado} />}
     </div>
   );

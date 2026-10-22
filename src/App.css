@@ -1,7 +1,6 @@
 /* ============================================
-   APPLE DESIGN SYSTEM - LIMPIO Y UNIFICADO
+   APPLE DESIGN SYSTEM - MAESTRO
    ============================================ */
-
 :root {
   --apple-blue: #007aff;
   --apple-blue-light: rgba(0, 122, 255, 0.12);
@@ -22,296 +21,81 @@
   --separator: rgba(60, 60, 67, 0.12);
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background-color: var(--bg-app);
-  color: var(--text-primary);
-  font-size: 16px;
-  line-height: 1.4;
-  min-height: 100vh;
-}
-
-/* ============================================
-   LAYOUT Y TABS (Navegación Superior)
-   ============================================ */
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif; background: var(--bg-app); color: var(--text-primary); font-size: 16px; line-height: 1.4; }
 .app { max-width: 760px; margin: 0 auto; padding: 24px 16px 100px; }
+h1 { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; text-align: center; margin-bottom: 24px; }
 
-h1 {
-  font-size: 32px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  text-align: center;
-  margin-bottom: 24px;
-}
+/* Tabs */
+.tabs-samsung { display: flex; background: rgba(118, 118, 128, 0.12); border-radius: 12px; padding: 3px; margin: 0 auto 24px auto; max-width: 400px; }
+.tab-item { flex: 1; text-align: center; padding: 8px 0; font-size: 14px; font-weight: 500; color: var(--text-primary); border-radius: 9px; background: transparent; border: none; cursor: pointer; }
+.tab-item.active { background: var(--bg-card); font-weight: 600; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+.subtabs-samsung { display: flex; background: rgba(118, 118, 128, 0.12); border-radius: 12px; padding: 3px; margin-bottom: 20px; }
+.subtab-item { flex: 1; padding: 8px 0; font-size: 14px; font-weight: 500; color: var(--text-primary); border-radius: 9px; background: transparent; border: none; cursor: pointer; }
+.subtab-item.active { background: var(--bg-card); font-weight: 600; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
 
-.tabs-samsung {
-  display: flex;
-  background: rgba(118, 118, 128, 0.12);
-  border-radius: 12px;
-  padding: 3px;
-  margin: 0 auto 24px auto;
-  max-width: 400px;
-}
+/* Cards & Layout */
+.apple-card { background: var(--bg-card); border-radius: 16px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); }
+.apple-label { display: block; font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; padding-left: 4px; }
 
-.tab-item {
-  flex: 1;
-  text-align: center;
-  padding: 8px 0;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-primary);
-  border-radius: 9px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
-}
+/* Inputs */
+input, select, textarea, .apple-input { width: 100%; padding: 12px 14px; background: var(--bg-input); border: 1.5px solid transparent; border-radius: 10px; font-size: 16px; font-family: inherit; color: var(--text-primary); transition: all 0.2s; -webkit-appearance: none; }
+input:focus, select:focus, textarea:focus, .apple-input:focus { outline: none; background: var(--bg-card); border-color: var(--apple-blue); box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15); }
+select { background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%238E8E93' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='4 6 8 10 12 6'/%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 14px center; background-size: 12px; padding-right: 36px; }
 
-.tab-item.active {
-  background: var(--bg-card);
-  font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-}
-
-.subtabs-samsung {
-  display: flex;
-  background: rgba(118, 118, 128, 0.12);
-  border-radius: 12px;
-  padding: 3px;
-  margin-bottom: 20px;
-}
-
-.subtab-item {
-  flex: 1;
-  padding: 8px 0;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-primary);
-  border-radius: 9px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.subtab-item.active {
-  background: var(--bg-card);
-  font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-}
-
-/* ============================================
-   TARJETAS (Cards)
-   ============================================ */
-.apple-card, .form-card {
-  background: var(--bg-card);
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 16px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-  border: 1px solid rgba(0,0,0,0.04);
-}
-
-.apple-label {
-  display: block;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 8px;
-  padding-left: 4px;
-}
-
-/* ============================================
-   INPUTS Y SELECTS
-   ============================================ */
-input, select, textarea, .apple-input {
-  width: 100%;
-  padding: 14px 16px;
-  background: var(--bg-input);
-  border: 1.5px solid transparent;
-  border-radius: 12px;
-  font-size: 16px;
-  font-family: inherit;
-  color: var(--text-primary);
-  transition: all 0.2s;
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-input:focus, select:focus, textarea:focus, .apple-input:focus {
-  outline: none;
-  background: var(--bg-card);
-  border-color: var(--apple-blue);
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
-}
-
-select {
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%238E8E93' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='4 6 8 10 12 6'/%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 16px center;
-  background-size: 14px;
-  padding-right: 40px;
-}
-
-/* ============================================
-   BOTONES (Apple Style)
-   ============================================ */
-.btn-apple {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 14px 20px;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-decoration: none;
-}
-
+/* Botones */
+.btn-apple { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 16px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
 .btn-apple:active { transform: scale(0.97); }
-
-.btn-apple-primary { background: var(--apple-blue); color: white; box-shadow: 0 4px 12px rgba(0,122,255,0.3); }
+.btn-apple-primary { background: var(--apple-blue); color: white; }
 .btn-apple-secondary { background: var(--apple-blue-light); color: var(--apple-blue); }
 .btn-apple-whatsapp { background: var(--apple-green-light); color: var(--apple-green); }
 .btn-apple-danger { background: var(--apple-red-light); color: var(--apple-red); }
-.btn-apple-gray { background: var(--bg-input); color: var(--text-primary); }
 
-/* ============================================
-   TOGGLES SWITCH (iOS Style)
-   ============================================ */
-.ios-toggle-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  min-height: 44px;
-}
-
-.ios-toggle-label {
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.ios-switch {
-  position: relative;
-  width: 51px;
-  height: 31px;
-  background-color: #E9E9EA;
-  border-radius: 31px;
-  transition: background-color 0.3s;
-  flex-shrink: 0;
-}
-
+/* Toggles */
+.ios-toggle-row { display: flex; justify-content: space-between; align-items: center; cursor: pointer; min-height: 44px; }
+.ios-toggle-label { font-size: 15px; font-weight: 500; }
+.ios-switch { position: relative; width: 51px; height: 31px; background-color: #E9E9EA; border-radius: 31px; transition: background-color 0.3s; flex-shrink: 0; }
 .ios-switch.active { background-color: var(--apple-green); }
-
-.ios-switch-knob {
-  position: absolute;
-  top: 2px; left: 2px;
-  width: 27px; height: 27px;
-  background-color: white;
-  border-radius: 50%;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
+.ios-switch-knob { position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; background-color: white; border-radius: 50%; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15); transition: transform 0.3s; }
 .ios-switch.active .ios-switch-knob { transform: translateX(20px); }
 
-/* ============================================
-   MODALIDADES DEL COTIZADOR
-   ============================================ */
-.modality-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-}
-
-.modality-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 4px;
-  background: var(--bg-input);
-  border: 2px solid transparent;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.modality-btn.active {
-  background: var(--bg-card);
-  border-color: var(--apple-blue);
-  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.15);
-}
-
-.modality-btn span:first-child { font-size: 24px; margin-bottom: 4px; }
-.modality-btn span:last-child { font-size: 11px; color: var(--text-secondary); }
+/* Modalidades */
+.modality-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.modality-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 4px; background: var(--bg-input); border: 2px solid transparent; border-radius: 10px; cursor: pointer; }
+.modality-btn.active { background: var(--bg-card); border-color: var(--apple-blue); box-shadow: 0 4px 12px rgba(0, 122, 255, 0.15); }
+.modality-btn span:first-child { font-size: 20px; margin-bottom: 4px; }
+.modality-btn span:last-child { font-size: 10px; color: var(--text-secondary); }
 .modality-btn.active span:last-child { color: var(--apple-blue); font-weight: 700; }
 
-/* ============================================
-   LISTAS Y PERSONAL
-   ============================================ */
-.apple-list-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--separator);
-  cursor: pointer;
-}
-
+/* Listas y Dropdowns (Apple Settings Style) */
+.apple-list-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--separator); cursor: pointer; transition: background 0.2s; }
+.apple-list-row:last-child { border-bottom: none; }
 .apple-list-row:active { background: var(--bg-input); }
-
-.apple-checkbox-circle {
-  width: 24px; height: 24px;
-  border-radius: 50%;
-  border: 2px solid var(--text-tertiary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.apple-checkbox-circle.checked { background: var(--apple-blue); border-color: var(--apple-blue); color: white; }
-.apple-checkbox-circle svg { width: 14px; height: 14px; }
-
-.apple-list-title { font-size: 16px; font-weight: 500; }
+.apple-checkbox-circle { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--text-tertiary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.apple-checkbox-circle.checked { background: var(--apple-blue); border-color: var(--apple-blue); }
+.apple-checkbox-circle svg { width: 12px; height: 12px; color: white; }
+.apple-list-title { font-size: 15px; font-weight: 500; }
 .apple-list-subtitle { font-size: 12px; color: var(--text-secondary); }
 
-.apple-badge-rol {
-  font-size: 10px; font-weight: 700; padding: 4px 8px;
-  border-radius: 99px; text-transform: uppercase;
-}
+.apple-dropdown-item { padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(--separator); }
+.apple-dropdown-item:last-child { border-bottom: none; }
+.apple-dropdown-item.active { background: var(--apple-blue); color: white; }
+.apple-dropdown-item.active span { color: white !important; }
+
+/* Badges de Roles */
+.apple-badge-rol { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 99px; text-transform: uppercase; }
 .rol-chofer { background: var(--apple-blue-light); color: var(--apple-blue); }
 .rol-auxiliar { background: var(--apple-green-light); color: var(--apple-green); }
 .rol-ambos { background: var(--apple-purple-light); color: var(--apple-purple); }
 
-/* ============================================
-   UTILIDADES
-   ============================================ */
+/* Utilidades */
 .flex-between { display: flex; justify-content: space-between; align-items: center; }
-.mt-4 { margin-top: 16px; } .mb-2 { margin-bottom: 8px; } .mb-4 { margin-bottom: 16px; }
+.flex { display: flex; } .gap-2 { gap: 8px; } .items-center { align-items: center; }
+.mt-2 { margin-top: 8px; } .mt-4 { margin-top: 16px; } .mb-2 { margin-bottom: 8px; } .mb-4 { margin-bottom: 16px; } .ml-2 { margin-left: 8px; }
+.w-full { width: 100%; }
 .border-t { border-top: 1px solid var(--separator); padding-top: 16px; }
-.text-sm { font-size: 14px; } .text-xs { font-size: 12px; } .font-semibold { font-weight: 600; }
+.btn-remove-punto { width: 32px; height: 32px; background: var(--apple-red-light); color: var(--apple-red); border: none; border-radius: 10px; font-weight: bold; cursor: pointer; flex-shrink: 0; }
 
-/* Botones apilados en la parte inferior */
-.sticky-bottom-bar {
-  position: fixed; bottom: 0; left: 0; right: 0; padding: 16px;
-  background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px);
-  border-top: 1px solid var(--separator); z-index: 100;
-}
+.sticky-bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; padding: 16px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); border-top: 1px solid var(--separator); z-index: 100; }
 .sticky-bottom-content { max-width: 760px; margin: 0 auto; display: flex; gap: 10px; }
 .pb-28 { padding-bottom: 7rem !important; }

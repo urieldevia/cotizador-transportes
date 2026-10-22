@@ -1,164 +1,56 @@
 import { useState } from 'react';
-import {
-  useCatalogo,
-  crearPersonal,
-  eliminarPersonal,
-} from '../hooks/useCatalogo';
-import type { RolPersonal } from '../lib/types';
-
-function etiquetaRol(rol: string): string {
-  if (rol === 'chofer') return 'Chofer';
-  if (rol === 'auxiliar') return 'Auxiliar';
-  if (rol === 'ambos') return 'Chofer/Aux';
-  return 'Sin definir';
-}
+import { useCatalogo, crearPersonal, eliminarPersonal } from '../hooks/useCatalogo';
 
 export function AdminPersonal() {
   const { personal, refrescar } = useCatalogo();
   const [mostrarForm, setMostrarForm] = useState(false);
   const [nombre, setNombre] = useState('');
   const [apodo, setApodo] = useState('');
-  const [telefono, setTelefono] = useState('');
-  const [rol, setRol] = useState<RolPersonal>('sin_definir');
+  const [rol, setRol] = useState('chofer');
   const [error, setError] = useState<string | null>(null);
 
-  const resetForm = () => {
-    setNombre('');
-    setApodo('');
-    setTelefono('');
-    setRol('sin_definir');
-    setError(null);
-  };
-
   const guardar = async () => {
-    if (!nombre.trim()) {
-      setError('El nombre es obligatorio');
-      return;
-    }
+    if (!nombre.trim()) { setError('El nombre es obligatorio'); return; }
     try {
-      await crearPersonal({
-        nombre_completo: nombre.trim().toUpperCase(),
-        apodo: apodo.trim() || null,
-        telefono: telefono.trim() || null,
-        rol,
-      });
-      resetForm();
-      setMostrarForm(false);
+      await crearPersonal({ nombre_completo: nombre.toUpperCase(), apodo: apodo || null, telefono: null, rol });
+      setNombre(''); setApodo(''); setMostrarForm(false); setError(null);
       await refrescar();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Error al guardar');
-    }
-  };
-
-  const eliminar = async (id: number) => {
-    if (!confirm('¿Eliminar a esta persona?')) return;
-    try {
-      await eliminarPersonal(id);
-      await refrescar();
-    } catch (e) {
-      alert('Error al eliminar');
-    }
+    } catch (e: any) { setError(e.message); }
   };
 
   return (
-    <div className="admin-seccion">
-      <div className="admin-header">
-        <h2>Personal ({personal.length})</h2>
-        <button
-          type="button"
-          className="btn-add-punto"
-          style={{ width: 'auto', padding: '10px 20px' }}
-          onClick={() => setMostrarForm(!mostrarForm)}
-        >
-          {mostrarForm ? 'Cancelar' : '+ Agregar'}
-        </button>
+    <div className="pb-28">
+      <div className="flex-between mb-4">
+        <h2 style={{ fontSize: '20px', fontWeight: 700 }}>Personal ({personal.length})</h2>
+        <button className="btn-apple btn-apple-secondary" onClick={() => setMostrarForm(!mostrarForm)}>{mostrarForm ? 'Cancelar' : '+ Agregar'}</button>
       </div>
 
       {mostrarForm && (
-        <div className="form-card">
-          <div className="form-group">
-            <label>Nombre completo *</label>
-            <input
-              type="text"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              placeholder="SAID HERNANDEZ HERNANDEZ"
-            />
-          </div>
-
-          <div className="row-2">
-            <div className="form-group">
-              <label>Apodo</label>
-              <input
-                type="text"
-                value={apodo}
-                onChange={(e) => setApodo(e.target.value)}
-                placeholder="Opcional"
-              />
-            </div>
-            <div className="form-group">
-              <label>Teléfono</label>
-              <input
-                type="text"
-                value={telefono}
-                onChange={(e) => setTelefono(e.target.value)}
-                placeholder="Opcional"
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>Rol</label>
-            <div className="radio-vertical">
-              {(
-                [
-                  ['chofer', 'Chofer'],
-                  ['auxiliar', 'Auxiliar'],
-                  ['ambos', 'Chofer y Auxiliar'],
-                  ['sin_definir', 'Sin definir'],
-                ] as const
-              ).map(([value, label]) => (
-                <label key={value} className="radio-line">
-                  <input
-                    type="radio"
-                    value={value}
-                    checked={rol === value}
-                    onChange={() => setRol(value as RolPersonal)}
-                  />
-                  {label}
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {error && <div className="error-box">{error}</div>}
-
-          <button type="button" className="btn-primary" onClick={guardar}>
-            Guardar
-          </button>
+        <div className="apple-card">
+          <label className="apple-label">NOMBRE COMPLETO</label>
+          <input className="apple-input mb-2" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="NOMBRE" />
+          <label className="apple-label">APODO</label>
+          <input className="apple-input mb-2" value={apodo} onChange={(e) => setApodo(e.target.value)} placeholder="Apodo (opcional)" />
+          <label className="apple-label">ROL</label>
+          <select className="apple-input mb-4" value={rol} onChange={(e) => setRol(e.target.value)}>
+            <option value="chofer">Chofer</option>
+            <option value="auxiliar">Auxiliar</option>
+            <option value="ambos">Chofer / Auxiliar</option>
+          </select>
+          {error && <div className="text-red-500 text-sm mb-2">{error}</div>}
+          <button className="btn-apple btn-apple-primary w-full" onClick={guardar}>Guardar</button>
         </div>
       )}
 
-      <div className="lista-cards">
+      <div className="apple-card p-0 overflow-hidden">
         {personal.map((p) => (
-          <div key={p.id} className="card-item">
-            <div className="card-info">
-              <div className="card-titulo">
-                {p.nombre_completo}
-                {p.apodo && ` (${p.apodo})`}
-              </div>
-              <div className="card-subtitulo">
-                {etiquetaRol(p.rol)}
-                {p.telefono && ` · ${p.telefono}`}
-              </div>
+          <div key={p.id} className="apple-list-row" style={{ padding: '10px 16px' }}>
+            <div style={{ flex: 1 }}>
+              <div className="apple-list-title" style={{ fontSize: '14px' }}>{p.nombre_completo}</div>
+              {p.apodo && <div className="apple-list-subtitle">({p.apodo})</div>}
             </div>
-            <button
-              type="button"
-              className="btn-remove-punto"
-              onClick={() => eliminar(p.id)}
-            >
-              ✕
-            </button>
+            <span className={`apple-badge-rol rol-${p.rol}`}>{p.rol}</span>
+            <button className="btn-remove-punto ml-2" onClick={async () => { await eliminarPersonal(p.id); await refrescar(); }}>✕</button>
           </div>
         ))}
       </div>
