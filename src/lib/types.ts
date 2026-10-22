@@ -1,3 +1,6 @@
+// ==========================================
+// 1. TIPOS DEL COTIZADOR (NUEVOS)
+// ==========================================
 export type TipoModalidad = 
   | 'flete_directo'
   | 'con_escalas'
@@ -19,16 +22,13 @@ export interface CotizacionRequest {
   unidadId: number;
   destinoId: number;
   
-  // SWITCHES
   incluirPuntosCarga: boolean;
   aplicaPorcentajeCarga: boolean;
   aplicaPorcentajeEntrega: boolean;
 
-  // PUNTOS
   puntosCarga: PuntoCotizacion[];
   puntosEntrega: PuntoCotizacion[];
 
-  // EXTRAS
   maniobras: Maniobras;
   montoManiobras: number;
   diasEstadia: number;
@@ -66,4 +66,72 @@ export interface Ubicacion {
   poblacion: string;
   estado: string;
   zona_base: boolean;
+}
+
+// ==========================================
+// 2. TIPOS DE CATÁLOGOS (ADMIN)
+// ==========================================
+export type RolPersonal = 'chofer' | 'auxiliar' | 'ambos' | 'sin_definir';
+
+export interface Propietario {
+  id: number;
+  nombre: string;
+  activo: boolean;
+}
+
+export interface UnidadFisica {
+  id: number;
+  propietario_id: number | null;
+  marca_modelo: string;
+  color: string | null;
+  placas: string | null;
+  tipo_unidad_id: number | null;
+  notas: string | null;
+  activo: boolean;
+}
+
+export interface Personal {
+  id: number;
+  nombre_completo: string;
+  apodo: string | null;
+  telefono: string | null;
+  rol: RolPersonal;
+  activo: boolean;
+}
+
+// ==========================================
+// 3. TIPOS DEL VOLANTE Y TRAZABILIDAD
+// ==========================================
+export type TipoParada = 'carga' | 'descarga';
+
+export interface Parada {
+  id: string;
+  tipo: TipoParada;
+  direccion: string;
+  hora: string;
+  notas: string;
+}
+
+export interface AsignacionUnidad {
+  id: string;
+  unidadFisicaId: number | null;
+  operadorId: number | null;
+  auxiliaresIds: number[];
+  destino: string;
+  costo: string;
+  paradas: Parada[];
+}
+
+export interface Volante {
+  id: number;
+  folio: string;
+  fecha: string | null;
+  cliente: string;
+  origen: string;
+  registro_a: string;
+  descripcion_servicios: string;
+  descripcion_carga: string;
+  unidades: AsignacionUnidad[];
+  created_at: string;
+  updated_at: string;
 }
