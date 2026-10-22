@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useCatalogo } from '../hooks/useCatalogo';
 import { normalizarTexto } from '../hooks/useUbicaciones';
 import type { Personal } from '../lib/types';
@@ -12,6 +12,9 @@ export function GenerarTexto() {
   const [copiado, setCopiado] = useState(false);
   const [busquedaPersonal, setBusquedaPersonal] = useState('');
 
+  // Usamos useRef para el input de la fecha nativa
+  const pickerFechaRef = useRef<HTMLInputElement>(null);
+
   const unidadSeleccionada = useMemo(() => unidades.find((u) => u.id === unidadFisicaId) || null, [unidades, unidadFisicaId]);
 
   const personalFiltrado = useMemo(() => {
@@ -22,6 +25,11 @@ export function GenerarTexto() {
 
   const togglePersonal = (id: number) => {
     setSeleccionados((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
+  };
+
+  const abrirPicker = () => {
+    pickerFechaRef.current?.showPicker?.();
+    pickerFechaRef.current?.click();
   };
 
   const texto = useMemo(() => {
@@ -84,8 +92,41 @@ export function GenerarTexto() {
       </div>
 
       <div className="apple-card">
-        <label className="apple-label">NOTAS</label>
-        <textarea className="apple-input" value={notas} onChange={(e) => setNotas(e.target.value)} placeholder="Notas opcionales..." />
+        <label className="apple-label">FECHA (OPCIONAL)</label>
+        <div style={{ position: 'relative' }}>
+          <input 
+            type="text" 
+            className="apple-input" 
+            value={fecha} 
+            onChange={(e) => setFecha(e.target.value)} 
+            placeholder="DD/MM/AAAA" 
+            style={{ paddingRight: '44px' }}
+          />
+          <button 
+            type="button" 
+            onClick={abrirPicker}
+            style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--apple-blue)', fontSize: '20px', cursor: 'pointer' }}
+          >
+            📅
+          </button>
+          <input
+            ref={pickerFechaRef}
+            type="date"
+            onChange={(e) => {
+              if (e.target.value) {
+                const [y, m, d] = e.target.value.split('-');
+                setFecha(`${d}/${m}/${y}`);
+              }
+            }}
+            style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', width: 0, height: 0 }}
+            tabIndex={-1}
+          />
+        </div>
+      </div>
+
+      <div className="apple-card">
+        <label className="apple-label">NOTAS (OPCIONAL)</label>
+        <textarea className="apple-input" value={notas} onChange={(e) => setNotas(e.target.value)} placeholder="Notas opcionales..." rows={3} />
       </div>
 
       {unidadSeleccionada && (
