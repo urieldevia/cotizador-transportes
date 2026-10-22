@@ -3097,4 +3097,118 @@ button.btn-apple.success {
     margin-top: 20px;
   }
 }
+/* ============================================
+   APPLE UI: TOGGLES Y SEGMENTED CONTROLS
+   ============================================ */
+
+/* Botonera Segmentada (Tipo de Servicio) */
+.apple-segmented {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  background: rgba(118, 118, 128, 0.12);
+  padding: 4px;
+  border-radius: 12px;
+}
+
+.apple-segmented button {
+  padding: 8px 4px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  cursor: pointer;
+}
+
+.apple-segmented button.active {
+  background: var(--bg-card-solid);
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Toggle Switch iOS */
+.ios-toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  min-height: 44px; /* Touch target Apple */
+}
+
+.ios-toggle-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.ios-switch {
+  position: relative;
+  width: 51px;
+  height: 31px;
+  background-color: #E9E9EA; /* iOS OFF state */
+  border-radius: 31px;
+  transition: background-color 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  flex-shrink: 0;
+}
+
+.ios-switch.active {
+  background-color: var(--apple-green); /* iOS ON state */
+}
+
+.ios-switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 1px 1px rgba(0, 0, 0, 0.16);
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.ios-switch.active .ios-switch-knob {
+  transform: translateX(20px);
+}
+
+/* Utilidades Flex */
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.mt-4 { margin-top: 16px; }
+.pt-4 { padding-top: 16px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-4 { margin-bottom: 16px; }
+.m-0 { margin: 0 !important; }
+.border-t { border-top: 1px solid var(--separator); }
+
+/* Ajuste Inputs en la lista de puntos */
+.punto-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.punto-ubicacion {
+  flex: 1;
+}
+.punto-pct input {
+  width: 65px;
+  padding: 14px 8px;
+  text-align: center;
+  font-weight: 600;
+  background: var(--bg-input);
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  font-size: 16px;
+}
+.punto-pct input:focus {
+  outline: none;
+  border-color: var(--apple-blue);
+  background: var(--bg-card-solid);
+}
 }

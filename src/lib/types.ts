@@ -1,3 +1,9 @@
+export type TipoServicio =
+  | 'flete'
+  | 'puro_traer'
+  | 'ida_y_regreso'
+  | 'multi_punto';
+
 export type Maniobras = 'incluidas' | 'sin_costo' | 'mas';
 
 export interface PuntoCotizacion {
@@ -6,13 +12,28 @@ export interface PuntoCotizacion {
 }
 
 export interface CotizacionRequest {
+  tipo: TipoServicio;
   unidadId: number;
+  destinoId: number;
+
+  // NUEVOS SWITCHES LÓGICOS
+  incluirPuntosCarga: boolean;
+  aplicaPorcentajeCarga: boolean;
+  aplicaPorcentajeEntrega: boolean;
+
+  // Puntos
   puntosCarga: PuntoCotizacion[];
   puntosEntrega: PuntoCotizacion[];
+
+  // Maniobras
   maniobras: Maniobras;
   montoManiobras: number;
+
+  // Otros
   diasEstadia: number;
   costoPorDia: number;
+  porcentajeRegreso: number;
+  porcentajeCliente: number;
 }
 
 export interface DesgloseItem {
@@ -24,6 +45,7 @@ export interface DesgloseItem {
 export interface CotizacionResult {
   folio: string;
   unidad: string;
+  tipoServicio: string;
   descripcion: string;
   desglose: DesgloseItem[];
   subtotalBase: number;
@@ -41,69 +63,4 @@ export interface Ubicacion {
   poblacion: string;
   estado: string;
   zona_base: boolean;
-}
-
-// ====== CATÁLOGOS ======
-
-export type RolPersonal = 'chofer' | 'auxiliar' | 'ambos' | 'sin_definir';
-
-export interface Propietario {
-  id: number;
-  nombre: string;
-  activo: boolean;
-}
-
-export interface UnidadFisica {
-  id: number;
-  propietario_id: number | null;
-  marca_modelo: string;
-  color: string | null;
-  placas: string | null;
-  tipo_unidad_id: number | null;
-  notas: string | null;
-  activo: boolean;
-}
-
-export interface Personal {
-  id: number;
-  nombre_completo: string;
-  apodo: string | null;
-  telefono: string | null;
-  rol: RolPersonal;
-  activo: boolean;
-}
-// ====== VOLANTES ======
-
-export type TipoParada = 'carga' | 'descarga';
-
-export interface Parada {
-  id: string;
-  tipo: TipoParada;
-  direccion: string;
-  hora: string;
-  notas: string;
-}
-
-export interface AsignacionUnidad {
-  id: string;
-  unidadFisicaId: number | null;
-  operadorId: number | null;
-  auxiliaresIds: number[];
-  destino: string;
-  costo: string;
-  paradas: Parada[];
-}
-
-export interface Volante {
-  id: number;
-  folio: string;
-  fecha: string | null;
-  cliente: string;
-  origen: string;
-  registro_a: string;
-  descripcion_servicios: string;
-  descripcion_carga: string;
-  unidades: AsignacionUnidad[];
-  created_at: string;
-  updated_at: string;
 }

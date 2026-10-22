@@ -7,7 +7,6 @@ import type {
   Ubicacion,
 } from './types';
 
-// ===== CACHE UBICACIONES CON PAGINACIÓN =====
 let cacheUbicaciones: Map<number, Ubicacion> | null = null;
 let promesaUbicaciones: Promise<Map<number, Ubicacion>> | null = null;
 
@@ -16,30 +15,15 @@ async function cargarUbicaciones(): Promise<Map<number, Ubicacion>> {
   if (promesaUbicaciones) return promesaUbicaciones;
 
   promesaUbicaciones = (async () => {
+    const { data, error } = await supabase
+      .from('ubicaciones')
+      .select('id, poblacion, estado, zona_base')
+      .eq('activo', true);
+
+    if (error) throw new Error(`Error cargando ubicaciones: ${error.message}`);
+
     const map = new Map<number, Ubicacion>();
-    const LOTE = 1000;
-    let desde = 0;
-    let continuar = true;
-
-    while (continuar) {
-      const { data, error } = await supabase
-        .from('ubicaciones')
-        .select('id, poblacion, estado, zona_base')
-        .eq('activo', true)
-        .range(desde, desde + LOTE - 1);
-
-      if (error) throw new Error(`Error cargando ubicaciones: ${error.message}`);
-
-      const filas = (data ?? []) as Ubicacion[];
-      filas.forEach((u) => map.set(u.id, u));
-
-      if (filas.length < LOTE) {
-        continuar = false;
-      } else {
-        desde += LOTE;
-      }
-    }
-
+    (data ?? []).forEach((u) => map.set(u.id, u as Ubicacion));
     cacheUbicaciones = map;
     return map;
   })();
@@ -47,7 +31,6 @@ async function cargarUbicaciones(): Promise<Map<number, Ubicacion>> {
   return promesaUbicaciones;
 }
 
-// ===== CACHE TARIFAS CON PAGINACIÓN =====
 let cacheTarifas: Map<string, number> | null = null;
 let promesaTarifas: Promise<Map<string, number>> | null = null;
 
@@ -56,32 +39,17 @@ async function cargarTarifas(): Promise<Map<string, number>> {
   if (promesaTarifas) return promesaTarifas;
 
   promesaTarifas = (async () => {
+    const { data, error } = await supabase
+      .from('tarifas')
+      .select('destino_id, unidad_id, costo')
+      .eq('activo', true);
+
+    if (error) throw new Error(`Error cargando tarifas: ${error.message}`);
+
     const map = new Map<string, number>();
-    const LOTE = 1000;
-    let desde = 0;
-    let continuar = true;
-
-    while (continuar) {
-      const { data, error } = await supabase
-        .from('tarifas')
-        .select('destino_id, unidad_id, costo')
-        .eq('activo', true)
-        .range(desde, desde + LOTE - 1);
-
-      if (error) throw new Error(`Error cargando tarifas: ${error.message}`);
-
-      const filas = data ?? [];
-      filas.forEach((t) => {
-        map.set(`${t.destino_id}::${t.unidad_id}`, Number(t.costo));
-      });
-
-      if (filas.length < LOTE) {
-        continuar = false;
-      } else {
-        desde += LOTE;
-      }
-    }
-
+    (data ?? []).forEach((t) => {
+      map.set(`${t.destino_id}::${t.unidad_id}`, Number(t.costo));
+    });
     cacheTarifas = map;
     return map;
   })();
@@ -89,9 +57,7 @@ async function cargarTarifas(): Promise<Map<string, number>> {
   return promesaTarifas;
 }
 
-// ===== CACHE UNIDADES =====
 let cacheUnidades: Map<number, string> | null = null;
-
 async function obtenerNombreUnidad(unidadId: number): Promise<string> {
   if (!cacheUnidades) {
     const { data } = await supabase.from('unidades').select('id, nombre');
@@ -120,6 +86,7 @@ async function procesarPuntos(
   puntos: PuntoCotizacion[],
   unidadId: number,
   tipo: 'carga' | 'entrega',
+  aplicarPorcentaje: boolean, // NUEVO PARÁMETRO
   desglose: DesgloseItem[]
 ): Promise<number> {
   if (puntos.length === 0) return 0;
@@ -138,10 +105,15 @@ async function procesarPuntos(
     const costoBase = tarifas.get(`${punto.ubicacionId}::${unidadId}`);
     if (costoBase === undefined) continue;
 
-    const monto = costoBase * (punto.porcentaje / 100);
+    // SI EL SWITCH ESTÁ APAGADO, SE COBRA EL 100%. SI ESTÁ PRENDIDO, SE USA EL VALOR DEL INPUT.
+    const porcentajeReal = aplicarPorcentaje ? punto.porcentaje : 100;
+    const monto = costoBase * (porcentajeReal / 100);
+    
     subtotal += monto;
 
-    const pctTexto = punto.porcentaje !== 100 ? ` (${punto.porcentaje}%)` : '';
+    const pctTexto = aplicarPorcentaje && punto.porcentaje !== 100 
+      ? ` (${punto.porcentaje}%)` 
+      : '';
     const etiqueta = tipo === 'carga' ? 'Carga' : 'Entrega';
 
     desglose.push({
@@ -164,17 +136,24 @@ export async function calcularCotizacion(
   const desglose: DesgloseItem[] = [];
   let subtotalBase = 0;
 
-  subtotalBase += await procesarPuntos(
-    req.puntosCarga,
-    req.unidadId,
-    'carga',
-    desglose
-  );
+  // === PUNTOS DE CARGA ===
+  // Solo procesar si el switch principal está encendido
+  if (req.incluirPuntosCarga) {
+    subtotalBase += await procesarPuntos(
+      req.puntosCarga,
+      req.unidadId,
+      'carga',
+      req.aplicaPorcentajeCarga, // Pasamos la bandera del switch
+      desglose
+    );
+  }
 
+  // === PUNTOS DE ENTREGA ===
   subtotalBase += await procesarPuntos(
     req.puntosEntrega,
     req.unidadId,
     'entrega',
+    req.aplicaPorcentajeEntrega, // Pasamos la bandera del switch
     desglose
   );
 
@@ -182,6 +161,7 @@ export async function calcularCotizacion(
     throw new Error('Agrega al menos un punto de entrega con ubicación válida');
   }
 
+  // === MANIOBRAS ===
   if (req.maniobras === 'mas' && req.montoManiobras > 0) {
     subtotalBase += req.montoManiobras;
     desglose.push({
@@ -191,34 +171,43 @@ export async function calcularCotizacion(
     });
   }
 
+  // === ESTADÍAS ===
   let huboEstadia = false;
   if (req.diasEstadia > 0 && req.costoPorDia > 0) {
     const montoEstadia = req.diasEstadia * req.costoPorDia;
     subtotalBase += montoEstadia;
     huboEstadia = true;
     desglose.push({
-      concepto: `Estadía (${req.diasEstadia} día${
-        req.diasEstadia > 1 ? 's' : ''
-      })`,
+      concepto: `Estadía (${req.diasEstadia} día${req.diasEstadia > 1 ? 's' : ''})`,
       monto: montoEstadia,
       detalle: `${formatearMoneda(req.costoPorDia)} por día`,
     });
   }
 
-  const total = subtotalBase;
+  const total = subtotalBase * (req.porcentajeCliente / 100);
 
+  if (req.porcentajeCliente !== 100) {
+    desglose.push({
+      concepto: `Ajuste cliente (${req.porcentajeCliente}%)`,
+      monto: total - subtotalBase,
+      detalle: req.porcentajeCliente > 100 ? 'Incremento' : 'Descuento',
+    });
+  }
+
+  // === DESCRIPCIÓN ===
   const ubicaciones = await cargarUbicaciones();
   const partes: string[] = [];
 
-  const cargasValidas = req.puntosCarga.filter((p) => p.ubicacionId);
-  const entregasValidas = req.puntosEntrega.filter((p) => p.ubicacionId);
-
-  for (const punto of cargasValidas) {
-    const ubic = ubicaciones.get(punto.ubicacionId!);
-    if (ubic) partes.push(`Carga en ${ubic.poblacion}, ${ubic.estado}`);
+  if (req.incluirPuntosCarga) {
+    const cargasValidas = req.puntosCarga.filter((p) => p.ubicacionId);
+    for (const punto of cargasValidas) {
+      const ubic = ubicaciones.get(punto.ubicacionId!);
+      if (ubic) partes.push(`Carga en ${ubic.poblacion}, ${ubic.estado}`);
+    }
   }
 
-  if (entregasValidas.length === 1 && cargasValidas.length === 0) {
+  const entregasValidas = req.puntosEntrega.filter((p) => p.ubicacionId);
+  if (entregasValidas.length === 1 && (!req.incluirPuntosCarga || req.puntosCarga.length === 0)) {
     const ubic = ubicaciones.get(entregasValidas[0].ubicacionId!);
     if (ubic) partes.push(`Fleta a ${ubic.poblacion}, ${ubic.estado}`);
   } else {
@@ -232,21 +221,16 @@ export async function calcularCotizacion(
   descripcion += `En unidad ${nombreUnidad} con rampa hidráulica. `;
   descripcion += `${formatearMoneda(total)} + IVA.`;
 
-  if (req.maniobras === 'sin_costo') {
-    descripcion += ' Con maniobras incluidas.';
-  } else if (req.maniobras === 'mas' && req.montoManiobras > 0) {
-    descripcion += ' Con maniobras incluidas.';
-  } else if (req.maniobras === 'mas' && req.montoManiobras === 0) {
-    descripcion += ' Más maniobras.';
-  }
+  if (req.maniobras === 'sin_costo') descripcion += ' Con maniobras incluidas.';
+  else if (req.maniobras === 'mas' && req.montoManiobras > 0) descripcion += ' Con maniobras incluidas.';
+  else if (req.maniobras === 'mas' && req.montoManiobras === 0) descripcion += ' Más maniobras.';
 
-  if (huboEstadia) {
-    descripcion += ' Estadía incluida.';
-  }
+  if (huboEstadia) descripcion += ' Estadía incluida.';
 
   return {
     folio: generarFolio(),
     unidad: nombreUnidad,
+    tipoServicio: req.tipo,
     descripcion,
     desglose,
     subtotalBase,
