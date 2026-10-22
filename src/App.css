@@ -3211,4 +3211,88 @@ button.btn-apple.success {
   border-color: var(--apple-blue);
   background: var(--bg-card-solid);
 }
+/* ============================================
+   COTIZADOR MÓVIL (7 MODALIDADES Y SWITCHES)
+   ============================================ */
+.modality-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.modality-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 4px;
+  background: var(--bg-input);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.modality-btn.active {
+  background: var(--bg-card-solid);
+  border-color: var(--apple-blue);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.15);
+}
+
+.modality-btn span:first-child {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.modality-btn span:last-child {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.modality-btn.active span:last-child {
+  color: var(--apple-blue);
+  font-weight: 700;
+}
+
+.ios-toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.ios-toggle-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.ios-switch {
+  position: relative;
+  width: 51px;
+  height: 31px;
+  background-color: #E9E9EA;
+  border-radius: 31px;
+  transition: background-color 0.3s;
+  flex-shrink: 0;
+}
+
+.ios-switch.active { background-color: var(--apple-green); }
+
+.ios-switch-knob {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 27px; height: 27px;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.ios-switch.active .ios-switch-knob { transform: translateX(20px); }
+
+/* Ajustes extra para el resultado */
+.resultado-header h2 { text-transform: capitalize; }
+.msg-box { border: 1px solid var(--separator); padding: 12px; border-radius: 12px; }
 }

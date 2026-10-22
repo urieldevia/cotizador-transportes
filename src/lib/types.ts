@@ -1,8 +1,11 @@
-export type TipoServicio =
-  | 'flete'
-  | 'puro_traer'
-  | 'ida_y_regreso'
-  | 'multi_punto';
+export type TipoModalidad = 
+  | 'flete_directo'
+  | 'con_escalas'
+  | 'ruta_fija'
+  | 'regreso'
+  | 'consolidado'
+  | 'redondo'
+  | 'local';
 
 export type Maniobras = 'incluidas' | 'sin_costo' | 'mas';
 
@@ -12,24 +15,22 @@ export interface PuntoCotizacion {
 }
 
 export interface CotizacionRequest {
-  tipo: TipoServicio;
+  modalidad: TipoModalidad;
   unidadId: number;
   destinoId: number;
-
-  // NUEVOS SWITCHES LÓGICOS
+  
+  // SWITCHES
   incluirPuntosCarga: boolean;
   aplicaPorcentajeCarga: boolean;
   aplicaPorcentajeEntrega: boolean;
 
-  // Puntos
+  // PUNTOS
   puntosCarga: PuntoCotizacion[];
   puntosEntrega: PuntoCotizacion[];
 
-  // Maniobras
+  // EXTRAS
   maniobras: Maniobras;
   montoManiobras: number;
-
-  // Otros
   diasEstadia: number;
   costoPorDia: number;
   porcentajeRegreso: number;
@@ -45,8 +46,10 @@ export interface DesgloseItem {
 export interface CotizacionResult {
   folio: string;
   unidad: string;
-  tipoServicio: string;
+  modalidad: string;
   descripcion: string;
+  mensajeCliente: string;
+  mensajeOperador: string;
   desglose: DesgloseItem[];
   subtotalBase: number;
   total: number;
