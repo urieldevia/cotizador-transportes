@@ -2830,4 +2830,57 @@ button.btn-apple.success {
     font-size: 14px !important;
   }
 }
+/* ============================================
+   ESTILOS MÓVILES APPLE (Generar Texto)
+   ============================================ */
+.apple-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  padding-left: 4px;
+}
+
+.apple-input {
+  width: 100%;
+  padding: 16px;
+  background: var(--bg-input);
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--text-primary);
+  transition: all 0.2s;
+  -webkit-appearance: none;
+}
+
+.apple-input:focus {
+  outline: none;
+  background: var(--bg-card-solid);
+  border-color: var(--apple-blue);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+}
+
+/* Ocultar scrollbar feo en la lista de personal */
+.max-h-\[300px\]::-webkit-scrollbar {
+  width: 6px;
+}
+.max-h-\[300px\]::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.15);
+  border-radius: 10px;
+}
+
+/* Ajustes para la barra flotante */
+.pb-28 {
+  padding-bottom: 7rem !important;
+}
+
+@media (min-width: 768px) {
+  .pb-28 {
+    padding-bottom: 2rem !important;
+  }
+}
 }
