@@ -2883,4 +2883,218 @@ button.btn-apple.success {
     padding-bottom: 2rem !important;
   }
 }
+/* ============================================
+   MEJORAS UI MÓVIL APPLE (GENERAR TEXTO)
+   ============================================ */
+.apple-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  padding-left: 4px;
+}
+
+.apple-input {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--bg-input);
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--text-primary);
+  transition: all 0.2s;
+  -webkit-appearance: none;
+}
+
+.apple-input:focus {
+  outline: none;
+  background: var(--bg-card-solid);
+  border-color: var(--apple-blue);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+}
+
+.apple-select-trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--bg-input);
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.apple-select-trigger.active {
+  border-color: var(--apple-blue);
+  background: var(--bg-card-solid);
+}
+
+.text-placeholder { color: var(--text-tertiary); }
+.text-primary { color: var(--text-primary); }
+.chevron { color: var(--text-secondary); font-size: 12px; }
+
+.apple-dropdown-large {
+  max-height: 350px;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+
+.apple-search-sticky {
+  padding: 10px;
+  background: var(--bg-card-solid);
+  border-bottom: 1px solid var(--separator);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.apple-dropdown-scroll {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.apple-card-header {
+  padding: 16px;
+  background: var(--bg-grouped);
+  border-bottom: 1px solid var(--separator);
+}
+
+.apple-list-scroll {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.apple-list-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--separator);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.apple-list-row:active {
+  background: var(--bg-input-alt);
+}
+
+.apple-checkbox-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--text-quaternary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.apple-checkbox-circle.checked {
+  background: var(--apple-blue);
+  border-color: var(--apple-blue);
+}
+
+.apple-checkbox-circle svg {
+  width: 14px;
+  height: 14px;
+  color: white;
+}
+
+.apple-list-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.apple-list-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.apple-list-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.apple-badge-rol {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 99px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.apple-badge-rol.rol-chofer { background: rgba(0, 122, 255, 0.1); color: var(--apple-blue); }
+.apple-badge-rol.rol-auxiliar { background: rgba(52, 199, 89, 0.1); color: var(--apple-green); }
+.apple-badge-rol.rol-ambos { background: rgba(175, 82, 222, 0.1); color: var(--apple-purple); }
+
+.input-with-icon {
+  position: relative;
+}
+
+.pr-icon {
+  padding-right: 44px;
+}
+
+.icon-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 8px;
+  color: var(--apple-blue);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.sticky-bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid var(--separator);
+  z-index: 100;
+}
+
+.sticky-bottom-content {
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  gap: 10px;
+}
+
+.pb-28 { padding-bottom: 7rem !important; }
+
+@media (min-width: 768px) {
+  .pb-28 { padding-bottom: 2rem !important; }
+  .sticky-bottom-bar {
+    position: static;
+    background: transparent;
+    backdrop-filter: none;
+    border: none;
+    padding: 0;
+    margin-top: 20px;
+  }
+}
 }
