@@ -25,19 +25,19 @@ export function GenerarTexto() {
     setSeleccionados((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
   };
 
-  // Línea corta (20 guiones) que no se rompe en móvil
+  // Línea corta para que no se rompa en WhatsApp
   const texto = useMemo(() => {
     if (!unidadSeleccionada) return '';
-    const sep = '--------------------';
-    const partes = [sep, `🚛 TRANSPORTES RAMÍREZ`, sep, `🚚 Unidad: ${unidadSeleccionada.marca_modelo} ${unidadSeleccionada.color || ''}`, `🔢 Placas: ${unidadSeleccionada.placas || 'N/A'}`];
+    const sep = '-------------------';
+    const partes = [sep, `🚛 TRANSPORTES RAMÍREZ`, sep, `🚚 Unidad: ${unidadSeleccionada.marca_modelo} ${unidadSeleccionada.color || ''}`, `🔢 Placas: ${unidadSeleccionada.placas || 'N/A'}`, ''];
     partes.push('👥 PERSONAL ASIGNADO:');
     
     const lista = seleccionados.map(id => personal.find(p => p.id === id)).filter((p): p is Personal => !!p);
     if (lista.length === 0) partes.push('  (sin personal)');
     else lista.forEach(p => partes.push(`  • ${p.nombre_completo}`));
     
-    if (notas.trim()) { partes.push('📝 NOTAS:', notas.trim()); }
-    if (fecha) { partes.push(`📅 Fecha: ${fecha}`); }
+    if (notas.trim()) { partes.push('', '📝 NOTAS:', notas.trim()); }
+    if (fecha) { partes.push('', `📅 Fecha: ${fecha}`); }
     partes.push(sep);
     return partes.join('\n');
   }, [unidadSeleccionada, seleccionados, personal, notas, fecha]);
@@ -63,7 +63,7 @@ export function GenerarTexto() {
           <input type="text" className="apple-input text-sm" placeholder="🔍 Buscar personal..." value={busquedaPersonal} onChange={(e) => setBusquedaPersonal(e.target.value)} />
         </div>
         
-        <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+        <div style={{ maxHeight: '250px', overflowY: 'auto' }}>
           {personalFiltrado.map((p) => {
             const activo = seleccionados.includes(p.id);
             return (

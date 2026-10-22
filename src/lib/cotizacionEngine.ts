@@ -6,17 +6,14 @@ let cacheTarifas: Map<string, number> | null = null;
 
 async function cargarUbicaciones(): Promise<Map<number, Ubicacion>> {
   if (cacheUbicaciones) return cacheUbicaciones;
-  const { data, error } = await supabase.from('ubicaciones').select('id, poblacion, estado, zona_base').eq('activo', true);
-  if (error) throw new Error(error.message);
+  const { data } = await supabase.from('ubicaciones').select('id, poblacion, estado, zona_base').eq('activo', true);
   cacheUbicaciones = new Map((data ?? []).map(u => [u.id, u as Ubicacion]));
   return cacheUbicaciones;
 }
 
 async function cargarTarifas(): Promise<Map<string, number>> {
   if (cacheTarifas) return cacheTarifas;
-  const { data, error } = await supabase.from('tarifas').select('destino_id, unidad_id, costo').eq('activo', true);
-  if (error) throw new Error(error.message);
-  if (!data || data.length === 0) throw new Error('La tabla de tarifas está vacía en Supabase.');
+  const { data } = await supabase.from('tarifas').select('destino_id, unidad_id, costo').eq('activo', true);
   cacheTarifas = new Map((data ?? []).map(t => [`${t.destino_id}::${t.unidad_id}`, Number(t.costo)]));
   return cacheTarifas;
 }
@@ -36,19 +33,23 @@ async function procesarPuntos(puntos: PuntoCotizacion[], unidadId: number, tipo:
     const ubic = ubicaciones.get(punto.ubicacionId);
     const costoBase = tarifas.get(`${punto.ubicacionId}::${unidadId}`);
     
-    if (!ubic || costoBase === undefined) {
-      throw new Error(`No hay tarifa registrada para ${ubic?.poblacion || 'la ubicación seleccionada'} con esta unidad.`);
-    }
-
     const porcentajeReal = aplicarPorcentaje ? punto.porcentaje : 100;
-    const monto = costoBase * (porcentajeReal / 100);
+    const monto = (costoBase || 0) * (porcentajeReal / 100);
     subtotal += monto;
 
-    desglose.push({
-      concepto: `${tipo === 'carga' ? 'Carga' : 'Entrega'}${aplicarPorcentaje && punto.porcentaje !== 100 ? ` (${punto.porcentaje}%)` : ''}`,
-      monto,
-      detalle: `${ubic.poblacion}, ${ubic.estado}`,
-    });
+    if (!costoBase) {
+      desglose.push({
+        concepto: `${tipo === 'carga' ? 'Carga' : 'Entrega'} (Sin tarifa)`,
+        monto: 0,
+        detalle: `${ubic?.poblacion || 'Ubicación'}, ${ubic?.estado || ''} - Revisar BD`,
+      });
+    } else {
+      desglose.push({
+        concepto: `${tipo === 'carga' ? 'Carga' : 'Entrega'}${aplicarPorcentaje && punto.porcentaje !== 100 ? ` (${punto.porcentaje}%)` : ''}`,
+        monto,
+        detalle: `${ubic?.poblacion}, ${ubic?.estado}`,
+      });
+    }
   }
   return subtotal;
 }
@@ -57,13 +58,11 @@ export async function calcularCotizacion(req: CotizacionRequest): Promise<Cotiza
   const desglose: DesgloseItem[] = [];
   let subtotalBase = 0;
 
-  // Cálculos
   if (req.incluirPuntosCarga) {
     subtotalBase += await procesarPuntos(req.puntosCarga, req.unidadId, 'carga', req.aplicaPorcentajeCarga, desglose);
   }
   subtotalBase += await procesarPuntos(req.puntosEntrega, req.unidadId, 'entrega', req.aplicaPorcentajeEntrega, desglose);
 
-  // Modalidades
   let descModalidad = '';
   if (req.modalidad === 'regreso') {
     const desc = subtotalBase * 0.20; subtotalBase -= desc;
@@ -78,8 +77,7 @@ export async function calcularCotizacion(req: CotizacionRequest): Promise<Cotiza
     descModalidad = 'Viaje exclusivo.';
   }
 
-  // Extras
-  if (req.maniobras === 'mas' && req.montoManiobras > 0) {
+  if (req.aplicaManiobras && req.maniobras === 'mas' && req.montoManiobras > 0) {
     subtotalBase += req.montoManiobras;
     desglose.push({ concepto: 'Maniobras extra', monto: req.montoManiobras });
   }

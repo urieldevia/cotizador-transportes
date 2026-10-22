@@ -30,14 +30,12 @@ export function CotizadorForm() {
   const [incluirPuntosCarga, setIncluirPuntosCarga] = useState(false);
   const [aplicaPorcentajeCarga, setAplicaPorcentajeCarga] = useState(false);
   const [aplicaPorcentajeEntrega, setAplicaPorcentajeEntrega] = useState(false);
-  
-  // NUEVO SWITCH PARA MANIOBRAS
   const [aplicaManiobras, setAplicaManiobras] = useState(false);
-  const [maniobras, setManiobras] = useState<Maniobras>('incluidas');
-  const [montoManiobras, setMontoManiobras] = useState(0);
 
   const [puntosCarga, setPuntosCarga] = useState<PuntoCotizacion[]>([{ ubicacionId: null, porcentaje: 100 }]);
   const [puntosEntrega, setPuntosEntrega] = useState<PuntoCotizacion[]>([{ ubicacionId: null, porcentaje: 100 }]);
+  const [maniobras, setManiobras] = useState<Maniobras>('incluidas');
+  const [montoManiobras, setMontoManiobras] = useState(0);
   const [porcentajeCliente, setPorcentajeCliente] = useState(100);
 
   const [resultado, setResultado] = useState<CotizacionResult | null>(null);
@@ -58,12 +56,10 @@ export function CotizadorForm() {
     (async () => {
       try {
         const res = await calcularCotizacion({
-          modalidad, unidadId, destinoId: 0,
+          modalidad, unidadId,
           incluirPuntosCarga, aplicaPorcentajeCarga, aplicaPorcentajeEntrega,
-          puntosCarga, puntosEntrega, 
-          maniobras: aplicaManiobras ? maniobras : 'incluidas', 
-          montoManiobras: aplicaManiobras ? montoManiobras : 0,
-          diasEstadia: 0, costoPorDia: 0, porcentajeRegreso: 60, porcentajeCliente,
+          puntosCarga, puntosEntrega, aplicaManiobras, maniobras, montoManiobras,
+          porcentajeRegreso: 60, porcentajeCliente,
         });
         if (currentId === requestIdRef.current) { setResultado(res); setError(null); }
       } catch (e: any) {
@@ -98,16 +94,16 @@ export function CotizadorForm() {
         </select>
       </div>
 
-      {/* PUNTOS DE ENTREGA */}
+      {/* PUNTOS DE ENTREGA (EL PUNTO B) */}
       <div className="apple-card">
         <div className="flex-between mb-4">
-          <label className="apple-label m-0">PUNTOS DE ENTREGA</label>
+          <label className="apple-label m-0">PUNTOS DE ENTREGA (DESTINO)</label>
           <IOSToggle label="Aplicar %" checked={aplicaPorcentajeEntrega} onChange={setAplicaPorcentajeEntrega} />
         </div>
         {puntosEntrega.map((p, i) => (
           <div key={i} className="flex gap-2 items-center mb-2">
             <div style={{ flex: 1 }}>
-              <SelectorUbicacion label="" value={p.ubicacionId} onChange={(id) => updEntrega(i, { ubicacionId: id })} placeholder="Destino..." />
+              <SelectorUbicacion label="" value={p.ubicacionId} onChange={(id) => updEntrega(i, { ubicacionId: id })} placeholder="Destino final..." />
             </div>
             {aplicaPorcentajeEntrega && (
               <input type="number" className="apple-input" style={{ width: '70px' }} value={p.porcentaje || ''} onChange={(e) => updEntrega(i, { porcentaje: Number(e.target.value) })} placeholder="%" />
@@ -122,7 +118,7 @@ export function CotizadorForm() {
 
       {/* PUNTOS DE CARGA */}
       <div className="apple-card">
-        <IOSToggle label="Incluir Puntos de Carga" checked={incluirPuntosCarga} onChange={setIncluirPuntosCarga} />
+        <IOSToggle label="Incluir Puntos de Carga (Origen)" checked={incluirPuntosCarga} onChange={setIncluirPuntosCarga} />
         {incluirPuntosCarga && (
           <div className="mt-4 pt-4 border-t">
             <div className="flex-between mb-4">
@@ -147,7 +143,7 @@ export function CotizadorForm() {
         )}
       </div>
 
-      {/* MANIOBRAS (OCULTO POR DEFECTO) */}
+      {/* MANIOBRAS Y AJUSTES */}
       <div className="apple-card">
         <IOSToggle label="Incluir Maniobras" checked={aplicaManiobras} onChange={setAplicaManiobras} />
         {aplicaManiobras && (
@@ -168,7 +164,7 @@ export function CotizadorForm() {
         </div>
       </div>
 
-      {error && <div className="error-box" style={{ background: '#ff3b30', color: 'white', padding: '12px', borderRadius: '12px', marginBottom: '16px', textAlign: 'center', fontWeight: 'bold' }}>{error}</div>}
+      {error && <div className="error-box">{error}</div>}
       {resultado && <DesgloseCotizacion resultado={resultado} />}
     </div>
   );

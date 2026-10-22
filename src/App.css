@@ -1,6 +1,3 @@
-/* ============================================
-   APPLE DESIGN SYSTEM - MAESTRO
-   ============================================ */
 :root {
   --apple-blue: #007aff;
   --apple-blue-light: rgba(0, 122, 255, 0.12);
@@ -10,11 +7,9 @@
   --apple-red-light: rgba(255, 59, 48, 0.1);
   --apple-purple: #af52de;
   --apple-purple-light: rgba(175, 82, 222, 0.1);
-  
   --bg-app: #f2f2f7;
   --bg-card: #ffffff;
   --bg-input: #f2f2f7;
-  
   --text-primary: #000000;
   --text-secondary: #8e8e93;
   --text-tertiary: #c7c7cc;
@@ -49,7 +44,6 @@ select { background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='h
 .btn-apple-primary { background: var(--apple-blue); color: white; }
 .btn-apple-secondary { background: var(--apple-blue-light); color: var(--apple-blue); }
 .btn-apple-whatsapp { background: var(--apple-green-light); color: var(--apple-green); }
-.btn-apple-danger { background: var(--apple-red-light); color: var(--apple-red); }
 
 /* Toggles */
 .ios-toggle-row { display: flex; justify-content: space-between; align-items: center; cursor: pointer; min-height: 44px; }
@@ -67,7 +61,7 @@ select { background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='h
 .modality-btn span:last-child { font-size: 10px; color: var(--text-secondary); }
 .modality-btn.active span:last-child { color: var(--apple-blue); font-weight: 700; }
 
-/* Listas y Dropdowns (Apple Settings Style) */
+/* Listas (Apple Settings) */
 .apple-list-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--separator); cursor: pointer; transition: background 0.2s; }
 .apple-list-row:last-child { border-bottom: none; }
 .apple-list-row:active { background: var(--bg-input); }
@@ -75,18 +69,12 @@ select { background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='h
 .apple-checkbox-circle.checked { background: var(--apple-blue); border-color: var(--apple-blue); }
 .apple-checkbox-circle svg { width: 12px; height: 12px; color: white; }
 .apple-list-title { font-size: 15px; font-weight: 500; }
-.apple-list-subtitle { font-size: 12px; color: var(--text-secondary); }
 
+/* Dropdowns */
 .apple-dropdown-item { padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(--separator); }
 .apple-dropdown-item:last-child { border-bottom: none; }
 .apple-dropdown-item.active { background: var(--apple-blue); color: white; }
 .apple-dropdown-item.active span { color: white !important; }
-
-/* Badges de Roles */
-.apple-badge-rol { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 99px; text-transform: uppercase; }
-.rol-chofer { background: var(--apple-blue-light); color: var(--apple-blue); }
-.rol-auxiliar { background: var(--apple-green-light); color: var(--apple-green); }
-.rol-ambos { background: var(--apple-purple-light); color: var(--apple-purple); }
 
 /* Utilidades */
 .flex-between { display: flex; justify-content: space-between; align-items: center; }
@@ -99,3 +87,4 @@ select { background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='h
 .sticky-bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; padding: 16px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); border-top: 1px solid var(--separator); z-index: 100; }
 .sticky-bottom-content { max-width: 760px; margin: 0 auto; display: flex; gap: 10px; }
 .pb-28 { padding-bottom: 7rem !important; }
+.error-box { background: var(--apple-red); color: white; padding: 12px; border-radius: 12px; margin-bottom: 16px; text-align: center; font-weight: bold; font-size: 14px; }

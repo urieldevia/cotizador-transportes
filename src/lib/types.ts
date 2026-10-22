@@ -1,6 +1,3 @@
-// ==========================================
-// 1. TIPOS DEL COTIZADOR (NUEVOS)
-// ==========================================
 export type TipoModalidad = 
   | 'flete_directo'
   | 'con_escalas'
@@ -20,19 +17,20 @@ export interface PuntoCotizacion {
 export interface CotizacionRequest {
   modalidad: TipoModalidad;
   unidadId: number;
-  destinoId: number;
   
+  // Switches de control
   incluirPuntosCarga: boolean;
   aplicaPorcentajeCarga: boolean;
   aplicaPorcentajeEntrega: boolean;
+  aplicaManiobras: boolean;
 
+  // Puntos (Destinos y Orígenes)
   puntosCarga: PuntoCotizacion[];
   puntosEntrega: PuntoCotizacion[];
 
+  // Extras
   maniobras: Maniobras;
   montoManiobras: number;
-  diasEstadia: number;
-  costoPorDia: number;
   porcentajeRegreso: number;
   porcentajeCliente: number;
 }
@@ -68,9 +66,6 @@ export interface Ubicacion {
   zona_base: boolean;
 }
 
-// ==========================================
-// 2. TIPOS DE CATÁLOGOS (ADMIN)
-// ==========================================
 export type RolPersonal = 'chofer' | 'auxiliar' | 'ambos' | 'sin_definir';
 
 export interface Propietario {
@@ -99,9 +94,6 @@ export interface Personal {
   activo: boolean;
 }
 
-// ==========================================
-// 3. TIPOS DEL VOLANTE Y TRAZABILIDAD
-// ==========================================
 export type TipoParada = 'carga' | 'descarga';
 
 export interface Parada {
