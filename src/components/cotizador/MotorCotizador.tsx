@@ -200,12 +200,10 @@ export function MotorCotizador() {
   const enviarAVolante = () => {
     nuevoVolante();
     
-    // Asignar cliente principal (si hay uno)
     if (cotizador.destinos.length > 0) {
       setCliente(cotizador.destinos[0].nombre_ubicacion);
     }
     
-    // SALIDA DE BASE (Ya viene en nuevoVolante, pero le inyectamos la fecha correcta)
     const fechaActual = new Date().toISOString().split('T')[0];
 
     if (cotizador.incluir_origenes) {
@@ -217,7 +215,7 @@ export function MotorCotizador() {
           folio_fisico_cliente: '',
           folio_vinculado: '',
           ubicacion: o.nombre_ubicacion,
-          fecha: fechaActual, // <-- AGREGADO
+          fecha: fechaActual,
           hora: '08:00',
           hora_indefinida: true,
           detalle: `Unidad: ${cotizador.unidad.nombre} (Rampa)`
@@ -233,7 +231,7 @@ export function MotorCotizador() {
         folio_fisico_cliente: '',
         folio_vinculado: '',
         ubicacion: d.nombre_ubicacion,
-        fecha: fechaActual, // <-- AGREGADO
+        fecha: fechaActual,
         hora: '14:00',
         hora_indefinida: true,
         detalle: `Unidad: ${cotizador.unidad.nombre} (Rampa)`

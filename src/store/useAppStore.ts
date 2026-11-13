@@ -1,12 +1,10 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 import type {
-  TipoOperacion, UnidadInfo, OrigenDestino, ExtrasInfo,
   AsignacionUnidad, ParadaVolante, VolanteSeguimiento, EstadoServicio, Cliente
 } from '../types';
 
 interface AppState {
-  // ... (Cotizador y Despacho se mantienen igual, omitidos por brevedad)
   cotizador: any;
   setTipoOperacion: any;
   toggleExcepcion: any;
@@ -41,10 +39,11 @@ interface AppState {
   setFolioMaestro: (folio: string) => void;
   setFolioAdministrativo: (folio: string) => void;
   setFechaRealizacion: (fecha: string) => void;
+  setCliente: (cliente: string) => void; // <-- AGREGADO AQUÍ
   addClienteVolante: (cliente: string) => void;
   removeClienteVolante: (index: number) => void;
   setEstadoServicio: (estado: EstadoServicio) => void;
-  togglePagado: () => void; // <-- NUEVO
+  togglePagado: () => void;
   addUnidadVolante: () => void;
   updateUnidadVolante: (id: string, data: Partial<AsignacionUnidad>) => void;
   removeUnidadVolante: (id: string) => void;
@@ -55,7 +54,6 @@ interface AppState {
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
-  // ... cotizador y despacho
   cotizador: {
     tipo_operacion: 'flete',
     excepcion_cancelacion: false,
@@ -90,8 +88,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     folio_administrativo: '0814',
     fecha_apertura: new Date().toISOString().split('T')[0],
     fecha_realizacion: new Date().toISOString().split('T')[0],
-    clientes: [], // <-- Arreglo de clientes
-    pagado: false, // <-- Inicial
+    clientes: [],
+    pagado: false,
     estado_servicio: 'pendiente',
     unidades_asignadas: [{ id: `u-${Date.now()}`, unidad_fisica_id: null, operadores_ids: [], auxiliares_ids: [] }],
     itinerario: [{ 
@@ -132,8 +130,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   setFolioMaestro: (folio) => set((state) => ({ volante: { ...state.volante, folio_interno_maestro: folio } })),
   setFolioAdministrativo: (folio) => set((state) => ({ volante: { ...state.volante, folio_administrativo: folio } })),
   setFechaRealizacion: (fecha) => set((state) => ({ volante: { ...state.volante, fecha_realizacion: fecha } })),
+  setCliente: (cliente) => set((state) => ({ volante: { ...state.volante, clientes: [cliente] } })),
   
-  // Manejo de múltiples clientes
   addClienteVolante: (cliente) => set((state) => {
     if (!state.volante.clientes.includes(cliente)) {
       return { volante: { ...state.volante, clientes: [...state.volante.clientes, cliente] } };
@@ -154,7 +152,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   guardarVolante: async () => {
     const { volante, volantesGuardados, agregarCliente } = get();
 
-    // Guardar clientes nuevos en el catálogo
     for (const c of volante.clientes) {
       await agregarCliente(c);
     }
@@ -169,8 +166,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       folio: volante.folio_administrativo,
       fecha_apertura: volante.fecha_apertura,
       fecha_realizacion: volante.fecha_realizacion,
-      clientes: volante.clientes, // <-- Guardamos el arreglo
-      pagado: volante.pagado,     // <-- Guardamos el pago
+      clientes: volante.clientes,
+      pagado: volante.pagado,
       estado_servicio: volante.estado_servicio,
       unidades: volante.unidades_asignadas,
       itinerario: volante.itinerario,
@@ -215,7 +212,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         folio_interno_maestro: d.folio_interno || `VOL-INT-${d.id}`,
         fecha_apertura: d.fecha_apertura || new Date().toISOString().split('T')[0],
         fecha_realizacion: d.fecha_realizacion || d.fecha_apertura || new Date().toISOString().split('T')[0],
-        clientes: d.clientes || (d.cliente ? [d.cliente] : []), // Compatibilidad con datos viejos
+        clientes: d.clientes || (d.cliente ? [d.cliente] : []),
         pagado: d.pagado || false,
         estado_servicio: (d.estado_servicio || 'pendiente') as EstadoServicio,
         unidades_asignadas: d.unidades || [],
