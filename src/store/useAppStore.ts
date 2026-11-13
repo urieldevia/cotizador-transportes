@@ -39,7 +39,7 @@ interface AppState {
   setFolioMaestro: (folio: string) => void;
   setFolioAdministrativo: (folio: string) => void;
   setFechaRealizacion: (fecha: string) => void;
-  setCliente: (cliente: string) => void; // <-- AGREGADO AQUÍ
+  setCliente: (cliente: string) => void;
   addClienteVolante: (cliente: string) => void;
   removeClienteVolante: (index: number) => void;
   setEstadoServicio: (estado: EstadoServicio) => void;
