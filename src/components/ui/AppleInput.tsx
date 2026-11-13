@@ -1,24 +1,22 @@
-import { memo, forwardRef, type InputHTMLAttributes } from 'react';
+import { InputHTMLAttributes, forwardRef } from 'react';
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
-  hint?: string;
-  error?: string;
 }
 
-export const AppleInput = memo(
-  forwardRef<HTMLInputElement, Props>(
-    ({ label, hint, error, className = '', ...props }, ref) => {
-      return (
-        <div className="form-group">
-          {label && <label>{label}</label>}
-          <input ref={ref} className={className} {...props} />
-          {hint && !error && <small className="hint">{hint}</small>}
-          {error && <small className="hint error">{error}</small>}
-        </div>
-      );
-    }
-  )
+export const AppleInput = forwardRef<HTMLInputElement, Props>(
+  ({ label, className = '', style, ...props }, ref) => {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%' }}>
+        {label && (
+          <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', paddingLeft: '4px' }}>
+            {label}
+          </label>
+        )}
+        <input ref={ref} className={`input-apple ${className}`} style={style} {...props} />
+      </div>
+    );
+  }
 );
 
 AppleInput.displayName = 'AppleInput';

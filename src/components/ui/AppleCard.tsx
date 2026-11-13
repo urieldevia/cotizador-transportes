@@ -1,18 +1,16 @@
-import { memo, type ReactNode } from 'react';
+import React from 'react';
 
 interface Props {
-  children: ReactNode;
-  title?: string;
+  children: React.ReactNode;
   className?: string;
+  onClick?: () => void;
+  style?: React.CSSProperties;
 }
 
-export const AppleCard = memo(({ children, title, className = '' }: Props) => {
+export function AppleCard({ children, className = '', onClick, style }: Props) {
   return (
-    <div className={`form-card ${className}`}>
-      {title && <div className="form-section-titulo">{title}</div>}
+    <div className={`glass-card ${className}`} onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default', ...style }}>
       {children}
     </div>
   );
-});
-
-AppleCard.displayName = 'AppleCard';
+}
