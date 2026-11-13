@@ -22,8 +22,8 @@ const ESTADOS: { value: EstadoServicio; label: string; color: string }[] = [
 export function Volante() {
   const { 
     volante, volantesGuardados, addParada, updateParada, removeParada, 
-    setFolioAdministrativo, setFechaRealizacion, setEstadoServicio, addUnidadVolante, 
-    updateUnidadVolante, removeUnidadVolante, guardarVolante, 
+    setFolioAdministrativo, setFechaRealizacion, setEstadoServicio, 
+    updateUnidadVolante, guardarVolante, 
     cargarVolantes, cargarVolantePorId, nuevoVolante, clientes, cargarClientes,
     addClienteVolante, removeClienteVolante, togglePagado
   } = useAppStore();
@@ -34,6 +34,7 @@ export function Volante() {
   const [editandoFolio, setEditandoFolio] = useState(false);
   const [mostrarClientes, setMostrarClientes] = useState(false);
   const [nuevoClienteInput, setNuevoClienteInput] = useState('');
+  const [copiado, setCopiado] = useState(false);
 
   const summaryRef = useRef<HTMLDivElement>(null);
 
@@ -106,14 +107,6 @@ export function Volante() {
     }
   };
 
-  const handleTogglePersonalMain = (unidadId: string, personaId: number, campo: 'operadores_ids' | 'auxiliares_ids') => {
-    const unidad = volante.unidades_asignadas.find(u => u.id === unidadId);
-    if (!unidad) return;
-    const actuales = unidad[campo] || [];
-    const nuevos = actuales.includes(personaId) ? actuales.filter(id => id !== personaId) : [...actuales, personaId];
-    updateUnidadVolante(unidadId, { [campo]: nuevos } as any);
-  };
-
   const handleTogglePersonalParada = (paradaId: string, personaId: number, campo: 'operadores_ids' | 'auxiliares_ids') => {
     const parada = volante.itinerario.find(p => p.id_parada === paradaId);
     if (!parada) return;
@@ -137,6 +130,38 @@ export function Volante() {
       addClienteVolante(nuevoClienteInput.trim().toUpperCase());
       setNuevoClienteInput('');
     }
+  };
+
+  const copiarParaExcel = () => {
+    let descripcion = "";
+
+    volante.itinerario.forEach((p) => {
+      if (p.tipo === 'salida_base') return;
+
+      let parte = "";
+      const tipo = p.tipo.toUpperCase();
+      const horaStr = p.hora_indefinida ? "(Indef.)" : `(${p.hora})`;
+      const ubicacionStr = p.ubicacion || p.cliente_referencia || 'S/N';
+
+      parte += `${tipo}: ${ubicacionStr} ${horaStr}`;
+      
+      if (p.detalle) parte += ` [${p.detalle}]`;
+
+      if (descripcion !== "") descripcion += " -> ";
+      descripcion += parte;
+    });
+
+    if (descripcion === "") descripcion = "Sin ruta registrada";
+
+    const estadoPago = volante.pagado ? "LIQUIDADO" : "PENDIENTE DE PAGO";
+    const textoFinal = `${descripcion} | ${estadoPago}`;
+
+    navigator.clipboard.writeText(textoFinal).then(() => {
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2000);
+    }).catch(() => {
+      alert("Error al copiar al portapapeles");
+    });
   };
 
   const estadoActual = ESTADOS.find(e => e.value === volante.estado_servicio) || ESTADOS[0];
@@ -163,7 +188,12 @@ export function Volante() {
               ))}
             </select>
           </div>
-          <button className="btn-apple btn-secondary" onClick={nuevoVolante} style={{ padding: '6px 12px', fontSize: '12px' }}>+ Nuevo</button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button className="btn-apple btn-secondary" onClick={copiarParaExcel} style={{ padding: '6px 12px', fontSize: '12px', background: copiado ? '#34C759' : '#E5E5EA', color: copiado ? '#fff' : '#007AFF', fontWeight: 600 }}>
+              {copiado ? '✓ Copiado' : '📋 Copiar para Excel'}
+            </button>
+            <button className="btn-apple btn-secondary" onClick={nuevoVolante} style={{ padding: '6px 12px', fontSize: '12px' }}>+ Nuevo</button>
+          </div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
@@ -247,9 +277,51 @@ export function Volante() {
         </div>
       </AppleCard>
 
-      {/* ... (Sección de Unidades y Timeline se mantienen igual, excepto el input de clientes en las paradas) ... */}
-      
-      {/* Solo te muestro el bloque del Timeline que cambió */}
+      <AppleCard>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>Unidades Principales</h3>
+          <button 
+            onClick={() => {
+              const initId = `u-${Date.now()}`;
+              useAppStore.setState({ volante: { ...volante, unidades_asignadas: [{ id: initId, unidad_fisica_id: null, operadores_ids: [], auxiliares_ids: [] }] } });
+            }} 
+            style={{ background: 'none', border: 'none', color: '#FF9500', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}
+          >
+            Limpiar Todo 🗑️
+          </button>
+        </div>
+
+        {volante.unidades_asignadas.map((u, i) => (
+          <div key={u.id} style={{ marginBottom: '16px', padding: '16px', background: '#fafafa', borderRadius: '12px', border: '1px solid #eee' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span style={{ fontWeight: 600 }}>Unidad {i + 1}</span>
+            </div>
+            <select className="input-apple" value={u.unidad_fisica_id ?? ''} onChange={(e) => updateUnidadVolante(u.id, { unidad_fisica_id: Number(e.target.value) || null })}>
+              <option value="">Seleccionar unidad...</option>
+              {unidadesFisicas.map(uf => <option key={uf.id} value={uf.id}>{uf.marca_modelo} - {uf.placas}</option>)}
+            </select>
+            
+            <p style={{ fontSize: '12px', fontWeight: 600, color: 'gray', marginTop: '12px', marginBottom: '4px' }}>Operadores</p>
+            <div className="chip-container">
+              {personal.filter(p => p.rol === 'chofer' || p.rol === 'ambos' || p.rol.toLowerCase().includes('chofer')).map(op => (
+                <button key={op.id} className={`chip ${u.operadores_ids.includes(op.id) ? 'active' : ''}`} onClick={() => updateUnidadVolante(u.id, { operadores_ids: u.operadores_ids.includes(op.id) ? u.operadores_ids.filter(id => id !== op.id) : [...u.operadores_ids, op.id] })}>
+                  {formatearNombre(op.nombre_completo)}
+                </button>
+              ))}
+            </div>
+
+            <p style={{ fontSize: '12px', fontWeight: 600, color: 'gray', marginTop: '12px', marginBottom: '4px' }}>Auxiliares</p>
+            <div className="chip-container">
+              {personal.filter(p => !u.operadores_ids.includes(p.id)).map(aux => (
+                <button key={aux.id} className={`chip ${u.auxiliares_ids?.includes(aux.id) ? 'active' : ''}`} onClick={() => updateUnidadVolante(u.id, { auxiliares_ids: u.auxiliares_ids?.includes(aux.id) ? u.auxiliares_ids.filter(id => id !== aux.id) : [...(u.auxiliares_ids || []), aux.id] })}>
+                  {formatearNombre(aux.nombre_completo)}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </AppleCard>
+
       <AppleCard>
         <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '20px' }}>Timeline Logístico</h3>
         <div className="timeline-container">
@@ -270,7 +342,6 @@ export function Volante() {
                 <div style={{ display: 'grid', gap: '8px' }}>
                   {parada.tipo !== 'salida_base' && (
                     <>
-                      {/* CLIENTE EN LA PARADA VINCULADO AL CATÁLOGO */}
                       <input 
                         type="text" list="clientes-list-parada" className="input-apple" 
                         value={parada.cliente_referencia} onChange={(e) => updateParada(parada.id_parada, { cliente_referencia: e.target.value.toUpperCase() })} 
@@ -352,7 +423,6 @@ export function Volante() {
         </div>
       </AppleCard>
 
-      {/* CONTENEDOR DE IMAGEN OCULTO */}
       <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
         <div ref={summaryRef} style={{ padding: '40px', width: '600px', background: '#fff', color: '#000', fontFamily: 'sans-serif' }}>
           <div style={{ background: '#000', color: '#fff', padding: '20px', textAlign: 'center', marginBottom: '20px', borderRadius: '12px' }}>

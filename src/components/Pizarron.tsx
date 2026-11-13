@@ -367,7 +367,7 @@ export function Pizarron() {
                 </tr>
               ) : (
                 servicios.map((s) => {
-                  const op = personal.find(p => p.id === s.operador_id);
+                  // ELIMINADO: const op = ...
                   const auxs = (s.auxiliar_ids || []).map(id => personal.find(p => p.id === id)).filter(Boolean);
 
                   return (
@@ -376,7 +376,6 @@ export function Pizarron() {
                       
                       <td style={{ padding: '8px' }}>
                         <div style={{ fontWeight: 600 }}>{s.cliente || '-'}</div>
-                        {/* AQUÍ ESTÁ LA CORRECCIÓN DE LA FLECHA */}
                         <div style={{ fontSize: '11px', color: '#666' }}>{s.origen} {'->'} {s.destino}</div>
                         {s.notas && <div style={{ fontSize: '10px', color: '#999', marginTop: '2px' }}>{s.notas}</div>}
                       </td>
