@@ -30,7 +30,7 @@ export default defineConfig({
       }
     })
   ],
-  // Si vas a subir a Vercel, quita la línea 'base'. 
-  // Si subes a GitHub Pages, déjala como '/cotizador-transportes/'
-  base: '/' 
+  // ⚠️ AQUÍ ESTÁ LA CORRECCIÓN CLAVE
+  // Reemplaza 'cotizador-transportes' por el nombre exacto de tu repositorio en GitHub
+  base: '/cotizador-transportes/' 
 });
